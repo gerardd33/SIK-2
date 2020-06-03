@@ -22,13 +22,13 @@ void RadioInfo::parseArguments(int argc, const char** argv) {
 	for (int argId = 1; argId < argc; ++argId) {
 		if (argId % 2 == 1) { // A flag identifying the argument.
 			if (argId + 1 >= argc) { // No value for this argument.
-				usage();
+				ErrorHandler::usage();
 			}
 
 			char* argument = nullptr;
 			int sscanfResult = sscanf(argv[argId], "-%ms", &argument);
 			if (sscanfResult == 0 || argument[1] != 0) {
-				usage();
+				ErrorHandler::usage();
 			}
 
 			const char* argValue = argv[argId + 1];
@@ -51,19 +51,19 @@ void RadioInfo::parseArguments(int argc, const char** argv) {
 					} else if (strcmp(argValue, "no") == 0) {
 						this->requestMetadata = false;
 					} else {
-						usage();
+						ErrorHandler::usage();
 					}
 					break;
 
 				case 't':
 					this->timeout = static_cast<int>(strtol(argValue, nullptr, 10));
 					if (errno != 0 || this->timeout <= 0) { // Invalid number.
-						usage();
+						ErrorHandler::usage();
 					}
 					break;
 
 				default:
-					usage();
+					ErrorHandler::usage();
 			}
 		}
 	}

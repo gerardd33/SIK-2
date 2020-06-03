@@ -3,11 +3,14 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cerrno>
+#include <cstring>
 
 class ErrorHandler {
 public:
 	static void usage();
-	static void error(const char* message);
+	static void fatal(const char* message);
+	static void syserr(const char* message);
 };
 
 #endif //ERRORHANDLER_HPP_

@@ -5,7 +5,13 @@ void ErrorHandler::usage() {
 	exit(1);
 }
 
-void ErrorHandler::error(const char* message) {
+void ErrorHandler::fatal(const char* message) {
 	fprintf(stderr, "ERROR: %s\n", message);
+	exit(1);
+}
+
+void ErrorHandler::syserr(const char* message) {
+	fprintf(stderr, "ERROR: %s\n", message);
+	fprintf(stderr, "(%d; %s)\n", errno, strerror(errno));
 	exit(1);
 }

@@ -20,7 +20,7 @@ struct addrinfo* TcpClient::getAddressInfoFromRaw(const char* radioHost, const c
 	addressHints.ai_protocol = IPPROTO_TCP;
 
 	if (getaddrinfo(radioHost, radioPort, &addressHints, &addressResult) != 0) {
-
+		ErrorHandler::fatal("Failed to find address");
 	}
 
 	return nullptr;
