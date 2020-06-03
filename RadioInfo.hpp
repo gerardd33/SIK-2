@@ -1,8 +1,8 @@
 #ifndef RADIOINFO_HPP_
 #define RADIOINFO_HPP_
 
+#include "ErrorHandler.hpp"
 #include <cstdio>
-#include <cstdlib>
 #include <cstring>
 #include <cerrno>
 
@@ -19,11 +19,11 @@ public:
 		return radioResourcePath;
 	}
 
-	int getRadioPort() {
+	const char* getRadioPort() {
 		return radioPort;
 	}
 
-	int getTimeout() {
+	unsigned int getTimeout() {
 		return timeout;
 	}
 
@@ -35,12 +35,11 @@ public:
 private:
 	const char* radioHost;
 	const char* radioResourcePath;
-	int radioPort;
-	int timeout;
+	const char* radioPort;
+	unsigned int timeout;
 	bool requestMetadata;
 
-	static const int DEFAULT_TIMEOUT = 5;
-	static void usage();
+	static const unsigned int DEFAULT_TIMEOUT = 5;
 
 	void parseArguments(int argc, const char** argv);
 };

@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include "RadioInfo.hpp"
 
 RadioInfo::RadioInfo(int argc, const char** argv) {
@@ -7,19 +8,14 @@ RadioInfo::RadioInfo(int argc, const char** argv) {
 
 	this->radioHost = nullptr;
 	this->radioResourcePath = nullptr;
-	this->radioPort = -1;
+	this->radioPort = nullptr;
 
 	parseArguments(argc, argv);
 
 	// Any of the required arguments is absent.
-	if (this->radioHost == nullptr || this->radioResourcePath == nullptr || this->radioPort == -1) {
-		usage();
+	if (this->radioHost == nullptr || this->radioResourcePath == nullptr || this->radioPort == nullptr) {
+		ErrorHandler::usage();
 	}
-}
-
-void RadioInfo::usage() {
-	printf("Usage: ./radio-proxy -h host -r resource -p port [-m yes|no] [-t timeout]\n");
-	exit(1);
 }
 
 void RadioInfo::parseArguments(int argc, const char** argv) {
@@ -29,24 +25,24 @@ void RadioInfo::parseArguments(int argc, const char** argv) {
 				usage();
 			}
 
-			char *argument = nullptr;
+			char* argument = nullptr;
 			int sscanfResult = sscanf(argv[argId], "-%ms", &argument);
 			if (sscanfResult == 0 || argument[1] != 0) {
 				usage();
 			}
 
-			const char *argValue = argv[argId + 1];
+			const char* argValue = argv[argId + 1];
 			switch (argument[0]) {
-				case 'h': this->radioHost = argValue;
+				case 'h':
+					this->radioHost = argValue;
 					break;
 
-				case 'r': this->radioResourcePath = argValue;
+				case 'r':
+					this->radioResourcePath = argValue;
 					break;
 
-				case 'p': this->radioPort = static_cast<int>(strtol(argValue, nullptr, 10));
-					if (errno != 0 || this->radioPort < 0) { // Invalid number.
-						usage();
-					}
+				case 'p':
+					this->radioPort = argValue;
 					break;
 
 				case 'm':
