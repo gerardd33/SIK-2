@@ -11,6 +11,7 @@ RadioInfo::RadioInfo(int argc, const char** argv) {
 
 	parseArguments(argc, argv);
 
+	// Any of the required arguments is absent.
 	if (this->radioHost == nullptr || this->radioResourcePath == nullptr || this->radioPort == -1) {
 		usage();
 	}
@@ -56,11 +57,14 @@ void RadioInfo::parseArguments(int argc, const char** argv) {
 					} else {
 						usage();
 					}
+					break;
 
-				case 't': this->timeout = static_cast<int>(strtol(argValue, nullptr, 10));
-					if (errno == 0 || this->timeout <= 0) { // Invalid number.
+				case 't':
+					this->timeout = static_cast<int>(strtol(argValue, nullptr, 10));
+					if (errno != 0 || this->timeout <= 0) { // Invalid number.
 						usage();
 					}
+					break;
 
 				default:
 					usage();
