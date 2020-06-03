@@ -11,7 +11,7 @@ Player::Player(int argc, const char** argv) {
 	*/
 
 	TcpClient tcpClient(radioInfo);
-
+	FILE* socketFile = tcpClient.getSocketFile();
 }
 
 void Player::run() {

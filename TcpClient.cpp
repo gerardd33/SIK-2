@@ -1,12 +1,12 @@
 #include "TcpClient.hpp"
 
-TcpClient::TcpClient(RadioInfo& radioInfo) {
-	int socketFd = establishTcpConnection(radioInfo);
+TcpClient::TcpClient(RadioInfo& radioInfo) : radioInfo(radioInfo) {
+	int socketFd = establishTcpConnection();
 	this->socketFile = fdopen(socketFd, "r+");
 }
 
-int TcpClient::establishTcpConnection(RadioInfo& radioInfo) {
-	struct addrinfo* addressInfo = getAddressInfoFromRaw(radioInfo.getRadioHost(), radioInfo.getRadioPort());
+int TcpClient::establishTcpConnection() {
+	struct addrinfo* addressInfo = getAddressInfo();
 
 	int socketFd = socket(addressInfo->ai_family, addressInfo->ai_socktype, addressInfo->ai_protocol);
 	if (socketFd < 0) {
@@ -21,7 +21,7 @@ int TcpClient::establishTcpConnection(RadioInfo& radioInfo) {
 	return socketFd;
 }
 
-struct addrinfo* TcpClient::getAddressInfoFromRaw(const char* radioHost, const char* radioPort) {
+struct addrinfo* TcpClient::getAddressInfo() {
 	struct addrinfo addressHints;
 	struct addrinfo* addressResult;
 
@@ -30,7 +30,8 @@ struct addrinfo* TcpClient::getAddressInfoFromRaw(const char* radioHost, const c
 	addressHints.ai_socktype = SOCK_STREAM;
 	addressHints.ai_protocol = IPPROTO_TCP;
 
-	if (getaddrinfo(radioHost, radioPort, &addressHints, &addressResult) != 0) {
+	if (getaddrinfo(this->radioInfo.getRadioHost(), this->radioInfo.getRadioPort(),
+		&addressHints, &addressResult) != 0) {
 		ErrorHandler::fatal("Failed to find address");
 	}
 

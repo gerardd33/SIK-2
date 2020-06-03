@@ -13,10 +13,11 @@ public:
 	}
 
 private:
+	RadioInfo& radioInfo;
 	FILE* socketFile;
 
-	int establishTcpConnection(RadioInfo& radioInfo);
-	struct addrinfo* getAddressInfoFromRaw(const char* radioHost, const char* radioPort);
+	int establishTcpConnection();
+	struct addrinfo* getAddressInfo();
 };
 
 #endif //TCPCLIENT_HPP_
