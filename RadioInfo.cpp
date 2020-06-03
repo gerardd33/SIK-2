@@ -24,7 +24,6 @@ void RadioInfo::usage() {
 
 void RadioInfo::parseArguments(int argc, const char** argv) {
 	for (int argId = 1; argId < argc; ++argId) {
-		printf("%d %d %s\n", argc, argId, argv[argId]);
 		if (argId % 2 == 1) { // A flag identifying the argument.
 			if (argId + 1 >= argc) { // No value for this argument.
 				usage();
@@ -49,6 +48,7 @@ void RadioInfo::parseArguments(int argc, const char** argv) {
 						usage();
 					}
 					break;
+
 				case 'm':
 					if (strcmp(argValue, "yes") == 0) {
 						this->requestMetadata = true;
