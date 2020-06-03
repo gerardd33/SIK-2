@@ -19,11 +19,11 @@ public:
 		return radioResourcePath;
 	}
 
-	unsigned int getRadioPort() {
+	int getRadioPort() {
 		return radioPort;
 	}
 
-	unsigned int getTimeout() {
+	int getTimeout() {
 		return timeout;
 	}
 
@@ -35,12 +35,14 @@ public:
 private:
 	const char* radioHost;
 	const char* radioResourcePath;
-	unsigned int radioPort;
-	unsigned int timeout;
+	int radioPort;
+	int timeout;
 	bool requestMetadata;
 
-	static const unsigned int DEFAULT_TIMEOUT = 5;
+	static const int DEFAULT_TIMEOUT = 5;
 	static void usage();
+
+	void parseArguments(int argc, const char** argv);
 };
 
 #endif //RADIOINFO_HPP_

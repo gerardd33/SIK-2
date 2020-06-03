@@ -5,9 +5,27 @@ RadioInfo::RadioInfo(int argc, const char** argv) {
 	this->timeout = DEFAULT_TIMEOUT;
 	this->requestMetadata = false;
 
+	this->radioHost = nullptr;
+	this->radioResourcePath = nullptr;
+	this->radioPort = -1;
+
+	parseArguments(argc, argv);
+
+	if (this->radioHost == nullptr || this->radioResourcePath == nullptr || this->radioPort == -1) {
+		usage();
+	}
+}
+
+void RadioInfo::usage() {
+	printf("Usage: ./radio-proxy -h host -r resource -p port [-m yes|no] [-t timeout]\n");
+	exit(1);
+}
+
+void RadioInfo::parseArguments(int argc, const char** argv) {
 	for (int argId = 1; argId < argc; ++argId) {
+		printf("%d %d %s\n", argc, argId, argv[argId]);
 		if (argId % 2 == 1) { // A flag identifying the argument.
-			if (argId + 1 <= argc) { // No value for this argument.
+			if (argId + 1 >= argc) { // No value for this argument.
 				usage();
 			}
 
@@ -25,8 +43,8 @@ RadioInfo::RadioInfo(int argc, const char** argv) {
 				case 'r': this->radioResourcePath = argValue;
 					break;
 
-				case 'p': this->radioPort = static_cast<unsigned int>(strtol(argValue, nullptr, 10));
-					if (errno == 0 || this->radioPort < 0) { // Invalid number.
+				case 'p': this->radioPort = static_cast<int>(strtol(argValue, nullptr, 10));
+					if (errno != 0 || this->radioPort < 0) { // Invalid number.
 						usage();
 					}
 					break;
@@ -39,7 +57,7 @@ RadioInfo::RadioInfo(int argc, const char** argv) {
 						usage();
 					}
 
-				case 't': this->timeout = static_cast<unsigned int>(strtol(argValue, nullptr, 10));
+				case 't': this->timeout = static_cast<int>(strtol(argValue, nullptr, 10));
 					if (errno == 0 || this->timeout <= 0) { // Invalid number.
 						usage();
 					}
@@ -49,9 +67,4 @@ RadioInfo::RadioInfo(int argc, const char** argv) {
 			}
 		}
 	}
-}
-
-void RadioInfo::usage() {
-	printf("Usage: ./radio-proxy -h host -r resource -p port [-m yes|no] [-t timeout]\n");
-	exit(1);
 }
