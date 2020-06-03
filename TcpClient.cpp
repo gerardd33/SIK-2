@@ -7,7 +7,18 @@ TcpClient::TcpClient(RadioInfo& radioInfo) {
 
 int TcpClient::establishTcpConnection(RadioInfo& radioInfo) {
 	struct addrinfo* addressInfo = getAddressInfoFromRaw(radioInfo.getRadioHost(), radioInfo.getRadioPort());
-	return 0;
+
+	int socketFd = socket(addressInfo->ai_family, addressInfo->ai_socktype, addressInfo->ai_protocol);
+	if (socketFd < 0) {
+		ErrorHandler::syserr("socket");
+	}
+
+	if (connect(socketFd, addressInfo->ai_addr, addressInfo->ai_addrlen)  < 0) {
+		ErrorHandler::syserr("connect");
+	}
+
+	freeaddrinfo(addressInfo);
+	return socketFd;
 }
 
 struct addrinfo* TcpClient::getAddressInfoFromRaw(const char* radioHost, const char* radioPort) {
@@ -23,5 +34,5 @@ struct addrinfo* TcpClient::getAddressInfoFromRaw(const char* radioHost, const c
 		ErrorHandler::fatal("Failed to find address");
 	}
 
-	return nullptr;
+	return addressResult;
 }
