@@ -46,12 +46,63 @@ void ResponseProcessor::readHeaders() {
 }
 
 void ResponseProcessor::readData() {
-	// TODO demultipleksowanie metadanych
-	std::vector<char> buffer(this->metadataInterval, 0);
+	char* dataBuffer = (char*) malloc(sizeof(char) * (this->metadataInterval + 1));
+	char* metadataSizeBuffer = (char*) malloc(sizeof(char) * 2); // 1 byte + null-termination.
+	char* metadataBuffer = (char* )malloc(sizeof(char) * (METADATA_MAX_LENGTH + 1));
+	// Null-termination for writing.
+	dataBuffer[this->metadataInterval] = 0;
+	metadataSizeBuffer[1] = 0;
 
-	size_t resourceLength = 0;
+	while (true) {
+		size_t bytesRead = fread(dataBuffer, this->metadataInterval, sizeof(dataBuffer), socketFile);
+		if (bytesRead < this->metadataInterval) {
+			ErrorHandler::fatal("Timeout");
+		}
 
-	// TODO dokoncz, w szczegolnosci uwazaj na metadane i rozmiary blokow
+		if (ferror(socketFile)) {
+			ErrorHandler::syserr("fread");
+		}
+
+		if (feof(socketFile)) {
+			break;
+		}
+
+		// TODO usun debug
+		fprintf(stderr, "DATA start: \n");
+		printf("%s\n", dataBuffer);
+		fprintf(stderr, "DATA end: \n");
+
+		bytesRead = fread(metadataSizeBuffer, 1, sizeof(metadataSizeBuffer), socketFile);
+		if (bytesRead < 1) {
+			ErrorHandler::fatal("Processing server response");
+		}
+
+		auto metadataSize = static_cast<size_t>(strtol(metadataSizeBuffer, nullptr, 10));
+		if (metadataSize == 0) {
+			if (errno != 0) {
+				ErrorHandler::fatal("Processing server response");
+			} else {
+				continue;
+			}
+		}
+
+		metadataSize *= METADATA_BLOCKSIZE_FACTOR;
+		bytesRead = fread(metadataBuffer, metadataSize, sizeof(metadataBuffer), socketFile);
+		if (bytesRead < metadataSize) {
+			ErrorHandler::fatal("Processing server response");
+		}
+
+		metadataBuffer[metadataSize] = 0; // Null-termination for writing.
+
+		// TODO usun debug
+		fprintf(stderr, "METADATA start: \n");
+		fprintf(stderr, "%s\n", metadataBuffer);
+		fprintf(stderr, "METADATA end: \n");
+	}
+
+	free(dataBuffer);
+	free(metadataSizeBuffer);
+	free(metadataBuffer);
 }
 
 void ResponseProcessor::convertHeaderNameToLowercase(char* line) {
