@@ -2,17 +2,19 @@
 #define RESPONSEPROCESSOR_HPP_
 
 #include "ErrorHandler.hpp"
+#include "RadioInfo.hpp"
 #include <cctype>
 #include <vector>
 
 class ResponseProcessor {
 public:
-	explicit ResponseProcessor(FILE* socketFile) : socketFile(socketFile) {};
+	explicit ResponseProcessor(RadioInfo& radioInfo, FILE* socketFile);
 	void processServerResponse();
 
 private:
 	FILE* socketFile;
-	int metadataInterval = -1;
+	int metadataInterval;
+	bool requestMetadata;
 
 	bool readStatusLine();
 	void readHeaders();
@@ -25,6 +27,7 @@ private:
 
 	const size_t METADATA_MAX_LENGTH = 4080;
 	const size_t METADATA_BLOCKSIZE_FACTOR = 16;
+	const size_t DEFAULT_CHUNK_SIZE = 8192;
 };
 
 #endif //RESPONSEPROCESSOR_HPP_

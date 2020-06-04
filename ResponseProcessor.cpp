@@ -8,6 +8,9 @@ bool ResponseProcessor::readStatusLine() {
 	fscanf(socketFile, "%m[^ ] %d %m[^\r\n]\n",
 		&protocoleVersion, &statusCode, &statusMessage);
 
+	// TODO usun debug
+	fprintf(stderr, "status line: %d %s\n", statusCode, statusMessage);
+
 	free(protocoleVersion);
 	if (statusCode != 200 || strcmp(statusMessage, "OK") != 0) {
 		fprintf(stderr, "%d %s\n", statusCode, statusMessage);
@@ -28,6 +31,9 @@ void ResponseProcessor::readHeaders() {
 		if (getline(&line, &bufferSize, socketFile) == -1) {
 			ErrorHandler::syserr("getline");
 		}
+
+		// TODO usun debug
+		fprintf(stderr, "header: %s\n", line);
 
 		if (strcmp(line, "\r\n") == 0) {
 			break;
@@ -56,6 +62,7 @@ bool ResponseProcessor::checkIfFinished() {
 void ResponseProcessor::readAudioBlock(char* audioBuffer) {
 	size_t bytesRead = fread(audioBuffer, this->metadataInterval, sizeof(audioBuffer), socketFile);
 	if (bytesRead < this->metadataInterval) {
+		fprintf(stderr, "bytes read: %d out of %d\n", bytesRead, this->metadataInterval);
 		ErrorHandler::fatal("Timeout");
 	}
 
@@ -127,8 +134,9 @@ void ResponseProcessor::convertHeaderNameToLowercase(char* line) {
 
 void ResponseProcessor::checkIfMetadataInterval(char* line) {
 	int readValue;
-	int sscanfResult = sscanf(line, "icy-metaint:[ ]%d", &readValue);
+	int sscanfResult = sscanf(line, "icy-metaint:%d[\r\n]", &readValue);
 	if (sscanfResult > 0) {
+		printf("value: %d\n", readValue);
 		this->metadataInterval = readValue;
 	}
 }
@@ -137,6 +145,19 @@ void ResponseProcessor::processServerResponse() {
 	if (!readStatusLine()) {
 		return;
 	}
+	// TODO usun debug
+	fprintf(stderr, "Status line read\n");
 	readHeaders();
+	fprintf(stderr, "Headers read\n");
 	readData();
+	fprintf(stderr, "Data read\n");
+}
+
+ResponseProcessor::ResponseProcessor(RadioInfo& radioInfo, FILE* socketFile) : socketFile(socketFile),
+	requestMetadata(radioInfo.isRequestMetadata()) {
+	if (this->requestMetadata) {
+		this->metadataInterval = -1;
+	} else {
+		this->metadataInterval = DEFAULT_CHUNK_SIZE;
+	}
 }
