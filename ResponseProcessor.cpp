@@ -8,9 +8,6 @@ bool ResponseProcessor::readStatusLine() {
 	fscanf(socketFile, "%m[^ ] %d %m[^\r\n]\n",
 		&protocoleVersion, &statusCode, &statusMessage);
 
-	// TODO usun debug
-	fprintf(stderr, "status line: %d %s\n", statusCode, statusMessage);
-
 	free(protocoleVersion);
 	if (statusCode != 200 || strcmp(statusMessage, "OK") != 0) {
 		fprintf(stderr, "%d %s\n", statusCode, statusMessage);
@@ -32,9 +29,6 @@ void ResponseProcessor::readHeaders() {
 			ErrorHandler::syserr("getline");
 		}
 
-		// TODO usun debug
-		fprintf(stderr, "header: %s\n", line);
-
 		if (strcmp(line, "\r\n") == 0) {
 			break;
 		}
@@ -46,7 +40,7 @@ void ResponseProcessor::readHeaders() {
 	free(line);
 	free(parsedHeader);
 
-	if (this->metadataInterval == -1) {
+	if (this->dataChunkSize == -1) {
 		ErrorHandler::fatal("Processing server response");
 	}
 }
@@ -59,21 +53,29 @@ bool ResponseProcessor::checkIfFinished() {
 	return feof(socketFile);
 }
 
+void ResponseProcessor::printString(FILE* stream, char* string, size_t size) {
+	for (size_t byte = 0; byte < size; ++byte) {
+		fprintf(stream, "%c", string[byte]);
+	}
+	fprintf(stream, "\n");
+}
+
 void ResponseProcessor::readAudioBlock(char* audioBuffer) {
-	size_t bytesRead = fread(audioBuffer, this->metadataInterval, sizeof(audioBuffer), socketFile);
-	if (bytesRead < this->metadataInterval) {
-		fprintf(stderr, "bytes read: %d out of %d\n", bytesRead, this->metadataInterval);
+	size_t bytesRead = fread(audioBuffer, 1, this->dataChunkSize, socketFile);
+	if (bytesRead < this->dataChunkSize) {
+		fprintf(stderr, "bytes read: %d out of %d\n", bytesRead, this->dataChunkSize);
 		ErrorHandler::fatal("Timeout");
 	}
 
-	// TODO usun debug
-	fprintf(stderr, "DATA start: \n");
-	printf("%s\n", audioBuffer);
-	fprintf(stderr, "DATA end: \n");
+	printString(stdout, audioBuffer, this->dataChunkSize);
 }
 
 void ResponseProcessor::readMetadataBlock(char* metadataSizeBuffer, char* metadataBuffer) {
-	size_t bytesRead = fread(metadataSizeBuffer, 1, sizeof(metadataSizeBuffer), socketFile);
+	if (!this->requestMetadata) {
+		return;
+	}
+
+	size_t bytesRead = fread(metadataSizeBuffer, 1, 1, socketFile);
 	if (bytesRead < 1) {
 		ErrorHandler::fatal("Processing server response");
 	}
@@ -88,25 +90,22 @@ void ResponseProcessor::readMetadataBlock(char* metadataSizeBuffer, char* metada
 	}
 
 	metadataSize *= METADATA_BLOCKSIZE_FACTOR;
-	bytesRead = fread(metadataBuffer, metadataSize, sizeof(metadataBuffer), socketFile);
+	bytesRead = fread(metadataBuffer, 1, metadataSize, socketFile);
 	if (bytesRead < metadataSize) {
 		ErrorHandler::fatal("Processing server response");
 	}
 
-	metadataBuffer[metadataSize] = 0; // Null-termination for writing.
-
 	// TODO usun debug
 	fprintf(stderr, "METADATA start: \n");
-	fprintf(stderr, "%s\n", metadataBuffer);
+	printString(stderr, metadataBuffer, metadataSize);
 	fprintf(stderr, "METADATA end: \n");
 }
 
 void ResponseProcessor::readData() {
-	char* audioBuffer = (char*) malloc(sizeof(char) * (this->metadataInterval + 1));
-	char* metadataSizeBuffer = (char*) malloc(sizeof(char) * 2); // 1 byte + null-termination.
-	char* metadataBuffer = (char* )malloc(sizeof(char) * (METADATA_MAX_LENGTH + 1));
-	// Null-termination for writing.
-	audioBuffer[this->metadataInterval] = 0;
+	char* audioBuffer = (char*) malloc(sizeof(char) * this->dataChunkSize);
+	char metadataSizeBuffer[2];
+	char metadataBuffer[METADATA_MAX_LENGTH];
+	// Null-termination for conversion.
 	metadataSizeBuffer[1] = 0;
 
 	while (true) {
@@ -122,8 +121,6 @@ void ResponseProcessor::readData() {
 	}
 
 	free(audioBuffer);
-	free(metadataSizeBuffer);
-	free(metadataBuffer);
 }
 
 void ResponseProcessor::convertHeaderNameToLowercase(char* line) {
@@ -133,11 +130,21 @@ void ResponseProcessor::convertHeaderNameToLowercase(char* line) {
 }
 
 void ResponseProcessor::checkIfMetadataInterval(char* line) {
-	int readValue;
-	int sscanfResult = sscanf(line, "icy-metaint:%d[\r\n]", &readValue);
+	size_t readValue;
+	int sscanfResult = sscanf(line, "icy-metaint:%zu[\r\n]", &readValue);
 	if (sscanfResult > 0) {
-		printf("value: %d\n", readValue);
-		this->metadataInterval = readValue;
+		this->dataChunkSize = readValue;
+	}
+}
+
+ResponseProcessor::ResponseProcessor(RadioInfo& radioInfo, FILE* socketFile) : socketFile(socketFile),
+	requestMetadata(radioInfo.isRequestMetadata()) {
+	if (this->requestMetadata) {
+		fprintf(stderr, "METADATA REQUESTED\n");
+		this->dataChunkSize = -1;
+	} else {
+		fprintf(stderr, "DID NOT REQUEST METADATA\n");
+		this->dataChunkSize = DEFAULT_DATA_CHUNK_SIZE;
 	}
 }
 
@@ -145,19 +152,6 @@ void ResponseProcessor::processServerResponse() {
 	if (!readStatusLine()) {
 		return;
 	}
-	// TODO usun debug
-	fprintf(stderr, "Status line read\n");
 	readHeaders();
-	fprintf(stderr, "Headers read\n");
 	readData();
-	fprintf(stderr, "Data read\n");
-}
-
-ResponseProcessor::ResponseProcessor(RadioInfo& radioInfo, FILE* socketFile) : socketFile(socketFile),
-	requestMetadata(radioInfo.isRequestMetadata()) {
-	if (this->requestMetadata) {
-		this->metadataInterval = -1;
-	} else {
-		this->metadataInterval = DEFAULT_CHUNK_SIZE;
-	}
 }

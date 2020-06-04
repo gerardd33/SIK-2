@@ -2,11 +2,11 @@
 #include "Player.hpp"
 
 int main(int argc, const char** argv) {
-	std::cout << "Started running." << std::endl;
+	std::cerr << "Started running." << std::endl;
 
 	Player player(argc, argv);
 	player.run();
 
-	std::cout << "Finished running." << std::endl;
+	std::cerr << "Finished running." << std::endl;
 	return 0;
 }

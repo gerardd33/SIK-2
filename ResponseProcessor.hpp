@@ -13,8 +13,12 @@ public:
 
 private:
 	FILE* socketFile;
-	int metadataInterval;
+	size_t dataChunkSize;
 	bool requestMetadata;
+
+	const size_t METADATA_MAX_LENGTH = 4080;
+	const size_t METADATA_BLOCKSIZE_FACTOR = 16;
+	const size_t DEFAULT_DATA_CHUNK_SIZE = 8192;
 
 	bool readStatusLine();
 	void readHeaders();
@@ -24,10 +28,7 @@ private:
 	bool checkIfFinished();
 	void readAudioBlock(char* audioBuffer);
 	void readMetadataBlock(char* metadataSizeBuffer, char* metadataBuffer);
-
-	const size_t METADATA_MAX_LENGTH = 4080;
-	const size_t METADATA_BLOCKSIZE_FACTOR = 16;
-	const size_t DEFAULT_CHUNK_SIZE = 8192;
+	void printString(FILE* stream, char* string, size_t size);
 };
 
 #endif //RESPONSEPROCESSOR_HPP_
