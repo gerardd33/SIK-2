@@ -11,7 +11,7 @@ void RequestSender::sendInitialHeaders() {
 }
 
 void RequestSender::requestMetadata() {
-	if (fprintf(socketFile, METADATA_REQUEST,
+	if (fprintf(socketFile, METADATA_REQUEST, (int)this->radioInfo.isRequestMetadata(),
 				radioInfo.getRadioResourcePath(), radioInfo.getRadioHost()) < 0) {
 		ErrorHandler::fatal("Sending HTTP request");
 	}
@@ -25,8 +25,6 @@ void RequestSender::completeRequest() {
 
 void RequestSender::sendRequest() {
 	sendInitialHeaders();
-	if (this->radioInfo.isRequestMetadata()) {
-		requestMetadata();
-	}
+	requestMetadata();
 	completeRequest();
 }
