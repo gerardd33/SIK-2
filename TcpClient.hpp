@@ -21,6 +21,7 @@ private:
 
 	int establishTcpConnection();
 	struct addrinfo* getAddressInfo();
+	void setTimeout();
 };
 
 #endif //TCPCLIENT_HPP_

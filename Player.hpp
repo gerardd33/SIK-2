@@ -4,6 +4,7 @@
 #include "RadioInfo.hpp"
 #include "TcpClient.hpp"
 #include "RequestSender.hpp"
+#include "ResponseProcessor.hpp"
 
 class Player {
 public:

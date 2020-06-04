@@ -2,6 +2,7 @@
 
 TcpClient::TcpClient(RadioInfo& radioInfo) : radioInfo(radioInfo) {
 	this->socketFd = establishTcpConnection();
+	setTimeout();
 	this->socketFile = fdopen(this->socketFd, "r+");
 }
 
@@ -42,4 +43,18 @@ struct addrinfo* TcpClient::getAddressInfo() {
 TcpClient::~TcpClient() {
 	fclose(socketFile);
 	close(socketFd);
+}
+
+void TcpClient::setTimeout() {
+	struct timeval timeout;
+	timeout.tv_sec = this->radioInfo.getTimeout();
+	timeout.tv_usec = 0;
+
+	if (setsockopt(this->socketFd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
+		ErrorHandler::syserr("setsockopt");
+	}
+
+	if (setsockopt(this->socketFd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) < 0) {
+		ErrorHandler::syserr("setsockopt");
+	}
 }
