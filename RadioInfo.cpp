@@ -70,3 +70,9 @@ void RadioInfo::parseArguments(int argc, const char** argv) {
 		}
 	}
 }
+
+RadioInfo::~RadioInfo() {
+	free((char*)radioHost);
+	free((char*)radioResourcePath);
+	free((char*)radioPort);
+}

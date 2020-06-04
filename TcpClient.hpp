@@ -3,10 +3,12 @@
 
 #include "RadioInfo.hpp"
 #include <netdb.h>
+#include <unistd.h>
 
 class TcpClient {
 public:
 	explicit TcpClient(RadioInfo& radioInfo);
+	~TcpClient();
 
 	FILE* getSocketFile() {
 		return socketFile;
@@ -15,6 +17,7 @@ public:
 private:
 	RadioInfo& radioInfo;
 	FILE* socketFile;
+	int socketFd;
 
 	int establishTcpConnection();
 	struct addrinfo* getAddressInfo();

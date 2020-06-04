@@ -10,6 +10,7 @@
 class RadioInfo {
 public:
 	RadioInfo(int argc, const char** argv);
+	~RadioInfo();
 
 	const char* getRadioHost() {
 		return radioHost;

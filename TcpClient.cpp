@@ -1,8 +1,8 @@
 #include "TcpClient.hpp"
 
 TcpClient::TcpClient(RadioInfo& radioInfo) : radioInfo(radioInfo) {
-	int socketFd = establishTcpConnection();
-	this->socketFile = fdopen(socketFd, "r+");
+	this->socketFd = establishTcpConnection();
+	this->socketFile = fdopen(this->socketFd, "r+");
 }
 
 int TcpClient::establishTcpConnection() {
@@ -36,4 +36,9 @@ struct addrinfo* TcpClient::getAddressInfo() {
 	}
 
 	return addressResult;
+}
+
+TcpClient::~TcpClient() {
+	fclose(socketFile);
+	close(socketFd);
 }
