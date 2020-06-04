@@ -9,6 +9,8 @@ public:
 
 private:
 	FILE* socketFile;
+
+	bool readStatusLine();
 };
 
 #endif //RESPONSEPROCESSOR_HPP_

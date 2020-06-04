@@ -7,8 +7,6 @@ class RequestSender {
 public:
 	RequestSender(RadioInfo& radioInfo, FILE* socketFile);
 	void sendRequest();
-	void requestMetadata();
-	void completeRequest();
 
 private:
 	RadioInfo& radioInfo;
@@ -21,6 +19,10 @@ private:
 										 "Connection: close\r\n";
 
 	const char* METADATA_REQUEST = "Icy-MetaData: 1\r\n";
+
+	void sendInitialHeaders();
+	void requestMetadata();
+	void completeRequest();
 };
 
 #endif //REQUESTSENDER_HPP_
