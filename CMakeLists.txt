@@ -3,4 +3,4 @@ project(SIK_2)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(radio-proxy main.cpp Player.cpp Player.hpp RadioInfo.hpp RadioInfo.cpp TcpClient.cpp TcpClient.hpp ErrorHandler.cpp ErrorHandler.hpp Shoutcast.cpp Shoutcast.hpp)
+add_executable(radio-proxy main.cpp Player.cpp Player.hpp RadioInfo.hpp RadioInfo.cpp TcpClient.cpp TcpClient.hpp ErrorHandler.cpp ErrorHandler.hpp RequestSender.cpp RequestSender.hpp)
