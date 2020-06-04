@@ -34,15 +34,15 @@ void RadioInfo::parseArguments(int argc, const char** argv) {
 			const char* argValue = argv[argId + 1];
 			switch (argument[0]) {
 				case 'h':
-					this->radioHost = argValue;
+					this->radioHost = strdup(argValue);
 					break;
 
 				case 'r':
-					this->radioResourcePath = argValue;
+					this->radioResourcePath = strdup(argValue);
 					break;
 
 				case 'p':
-					this->radioPort = argValue;
+					this->radioPort = strdup(argValue);
 					break;
 
 				case 'm':
