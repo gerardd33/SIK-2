@@ -45,62 +45,76 @@ void ResponseProcessor::readHeaders() {
 	}
 }
 
+bool ResponseProcessor::checkIfFinished() {
+	if (ferror(socketFile)) {
+		ErrorHandler::syserr("fread");
+	}
+
+	return feof(socketFile);
+}
+
+void ResponseProcessor::readAudioBlock(char* audioBuffer) {
+	size_t bytesRead = fread(audioBuffer, this->metadataInterval, sizeof(audioBuffer), socketFile);
+	if (bytesRead < this->metadataInterval) {
+		ErrorHandler::fatal("Timeout");
+	}
+
+	// TODO usun debug
+	fprintf(stderr, "DATA start: \n");
+	printf("%s\n", audioBuffer);
+	fprintf(stderr, "DATA end: \n");
+}
+
+void ResponseProcessor::readMetadataBlock(char* metadataSizeBuffer, char* metadataBuffer) {
+	size_t bytesRead = fread(metadataSizeBuffer, 1, sizeof(metadataSizeBuffer), socketFile);
+	if (bytesRead < 1) {
+		ErrorHandler::fatal("Processing server response");
+	}
+
+	auto metadataSize = static_cast<size_t>(strtol(metadataSizeBuffer, nullptr, 10));
+	if (metadataSize == 0) {
+		if (errno != 0) {
+			ErrorHandler::fatal("Processing server response");
+		} else {
+			return;
+		}
+	}
+
+	metadataSize *= METADATA_BLOCKSIZE_FACTOR;
+	bytesRead = fread(metadataBuffer, metadataSize, sizeof(metadataBuffer), socketFile);
+	if (bytesRead < metadataSize) {
+		ErrorHandler::fatal("Processing server response");
+	}
+
+	metadataBuffer[metadataSize] = 0; // Null-termination for writing.
+
+	// TODO usun debug
+	fprintf(stderr, "METADATA start: \n");
+	fprintf(stderr, "%s\n", metadataBuffer);
+	fprintf(stderr, "METADATA end: \n");
+}
+
 void ResponseProcessor::readData() {
-	char* dataBuffer = (char*) malloc(sizeof(char) * (this->metadataInterval + 1));
+	char* audioBuffer = (char*) malloc(sizeof(char) * (this->metadataInterval + 1));
 	char* metadataSizeBuffer = (char*) malloc(sizeof(char) * 2); // 1 byte + null-termination.
 	char* metadataBuffer = (char* )malloc(sizeof(char) * (METADATA_MAX_LENGTH + 1));
 	// Null-termination for writing.
-	dataBuffer[this->metadataInterval] = 0;
+	audioBuffer[this->metadataInterval] = 0;
 	metadataSizeBuffer[1] = 0;
 
 	while (true) {
-		size_t bytesRead = fread(dataBuffer, this->metadataInterval, sizeof(dataBuffer), socketFile);
-		if (bytesRead < this->metadataInterval) {
-			ErrorHandler::fatal("Timeout");
-		}
-
-		if (ferror(socketFile)) {
-			ErrorHandler::syserr("fread");
-		}
-
-		if (feof(socketFile)) {
+		readAudioBlock(audioBuffer);
+		if (checkIfFinished()) {
 			break;
 		}
 
-		// TODO usun debug
-		fprintf(stderr, "DATA start: \n");
-		printf("%s\n", dataBuffer);
-		fprintf(stderr, "DATA end: \n");
-
-		bytesRead = fread(metadataSizeBuffer, 1, sizeof(metadataSizeBuffer), socketFile);
-		if (bytesRead < 1) {
-			ErrorHandler::fatal("Processing server response");
+		readMetadataBlock(metadataSizeBuffer, metadataBuffer);
+		if (checkIfFinished()) {
+			break;
 		}
-
-		auto metadataSize = static_cast<size_t>(strtol(metadataSizeBuffer, nullptr, 10));
-		if (metadataSize == 0) {
-			if (errno != 0) {
-				ErrorHandler::fatal("Processing server response");
-			} else {
-				continue;
-			}
-		}
-
-		metadataSize *= METADATA_BLOCKSIZE_FACTOR;
-		bytesRead = fread(metadataBuffer, metadataSize, sizeof(metadataBuffer), socketFile);
-		if (bytesRead < metadataSize) {
-			ErrorHandler::fatal("Processing server response");
-		}
-
-		metadataBuffer[metadataSize] = 0; // Null-termination for writing.
-
-		// TODO usun debug
-		fprintf(stderr, "METADATA start: \n");
-		fprintf(stderr, "%s\n", metadataBuffer);
-		fprintf(stderr, "METADATA end: \n");
 	}
 
-	free(dataBuffer);
+	free(audioBuffer);
 	free(metadataSizeBuffer);
 	free(metadataBuffer);
 }

@@ -19,6 +19,9 @@ private:
 	void readData();
 	void checkIfMetadataInterval(char* line);
 	void convertHeaderNameToLowercase(char* line);
+	bool checkIfFinished();
+	void readAudioBlock(char* audioBuffer);
+	void readMetadataBlock(char* metadataSizeBuffer, char* metadataBuffer);
 
 	const size_t METADATA_MAX_LENGTH = 4080;
 	const size_t METADATA_BLOCKSIZE_FACTOR = 16;
