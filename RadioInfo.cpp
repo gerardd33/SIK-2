@@ -18,54 +18,57 @@ RadioInfo::RadioInfo(int argc, const char** argv) {
 	}
 }
 
+void RadioInfo::assignArgument(char argumentFlag, const char* argumentValue) {
+	switch (argumentFlag) {
+		case 'h':
+			this->radioHost = strdup(argumentValue);
+			break;
+
+		case 'r':
+			this->radioResourcePath = strdup(argumentValue);
+			break;
+
+		case 'p':
+			this->radioPort = strdup(argumentValue);
+			break;
+
+		case 'm':
+			if (strcmp(argumentValue, "yes") == 0) {
+				this->requestMetadata = true;
+			} else if (strcmp(argumentValue, "no") == 0) {
+				this->requestMetadata = false;
+			} else {
+				ErrorHandler::usage();
+			}
+			break;
+
+		case 't':
+			this->timeout = static_cast<int>(strtol(argumentValue, nullptr, 10));
+			if (errno != 0 || this->timeout <= 0) { // Invalid number.
+				ErrorHandler::usage();
+			}
+			break;
+
+		default:
+			ErrorHandler::usage();
+	}
+}
+
 void RadioInfo::parseArguments(int argc, const char** argv) {
-	for (int argId = 1; argId < argc; ++argId) {
-		if (argId % 2 == 1) { // A flag identifying the argument.
-			if (argId + 1 >= argc) { // No value for this argument.
+	for (int argumentId = 1; argumentId < argc; ++argumentId) {
+		if (argumentId % 2 == 1) { // A flag identifying the argument.
+			if (argumentId + 1 >= argc) { // No value for this argument.
 				ErrorHandler::usage();
 			}
 
-			char* argument = nullptr;
-			int sscanfResult = sscanf(argv[argId], "-%ms", &argument);
-			if (sscanfResult == 0 || argument[1] != 0) {
+			char* argumentFlag = nullptr;
+			int sscanfResult = sscanf(argv[argumentId], "-%ms", &argumentFlag);
+			if (sscanfResult == 0 || argumentFlag[1] != 0) {
 				ErrorHandler::usage();
 			}
 
-			const char* argValue = argv[argId + 1];
-			switch (argument[0]) {
-				case 'h':
-					this->radioHost = strdup(argValue);
-					break;
-
-				case 'r':
-					this->radioResourcePath = strdup(argValue);
-					break;
-
-				case 'p':
-					this->radioPort = strdup(argValue);
-					break;
-
-				case 'm':
-					if (strcmp(argValue, "yes") == 0) {
-						this->requestMetadata = true;
-					} else if (strcmp(argValue, "no") == 0) {
-						this->requestMetadata = false;
-					} else {
-						ErrorHandler::usage();
-					}
-					break;
-
-				case 't':
-					this->timeout = static_cast<int>(strtol(argValue, nullptr, 10));
-					if (errno != 0 || this->timeout <= 0) { // Invalid number.
-						ErrorHandler::usage();
-					}
-					break;
-
-				default:
-					ErrorHandler::usage();
-			}
-		} else if (argv[argId][0] == '-') { // A value of the argument.
+			assignArgument(argumentFlag[0], argv[argumentId + 1]);
+		} else if (argv[argumentId][0] == '-') { // A value of the argument.
 			ErrorHandler::usage();
 		}
 	}

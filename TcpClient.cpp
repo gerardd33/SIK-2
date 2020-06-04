@@ -7,7 +7,6 @@ TcpClient::TcpClient(RadioInfo& radioInfo) : radioInfo(radioInfo) {
 }
 
 int TcpClient::establishTcpConnection() {
-	// TODO dodaj timeout
 	struct addrinfo* addressInfo = getAddressInfo();
 
 	int socketFd = socket(addressInfo->ai_family, addressInfo->ai_socktype, addressInfo->ai_protocol);

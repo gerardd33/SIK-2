@@ -8,7 +8,7 @@
 
 class Player {
 public:
-	Player(int argc, const char** argv) : radioInfo(argc, argv) {};
+	Player(int argc, const char** argv) : radioInfo(argc, argv) {}
 	void run();
 
 private:

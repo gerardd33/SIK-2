@@ -8,7 +8,7 @@
 
 class ResponseProcessor {
 public:
-	explicit ResponseProcessor(RadioInfo& radioInfo, FILE* socketFile);
+	ResponseProcessor(RadioInfo& radioInfo, FILE* socketFile);
 	void processServerResponse();
 
 private:
@@ -24,11 +24,11 @@ private:
 	void readHeaders();
 	void readData();
 	void checkIfMetadataInterval(char* line);
-	void convertHeaderNameToLowercase(char* line);
 	bool checkIfFinished();
 	void readAudioBlock(char* audioBuffer);
 	void readMetadataBlock(char* metadataSizeBuffer, char* metadataBuffer);
-	void printString(FILE* stream, char* string, size_t size);
+	static void convertHeaderNameToLowercase(char* line);
+	static void printString(FILE* stream, char* string, size_t size);
 };
 
 #endif //RESPONSEPROCESSOR_HPP_

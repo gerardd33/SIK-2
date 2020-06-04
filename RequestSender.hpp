@@ -5,7 +5,7 @@
 
 class RequestSender {
 public:
-	RequestSender(RadioInfo& radioInfo, FILE* socketFile);
+	RequestSender(RadioInfo& radioInfo, FILE* socketFile) : radioInfo(radioInfo), socketFile(socketFile) {}
 	void sendRequest();
 
 private:

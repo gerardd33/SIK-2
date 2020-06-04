@@ -79,7 +79,7 @@ void ResponseProcessor::readMetadataBlock(char* metadataSizeBuffer, char* metada
 		ErrorHandler::fatal("Processing server response");
 	}
 
-	size_t metadataSize = static_cast<size_t>(metadataSizeBuffer[0]);
+	auto metadataSize = static_cast<size_t>(metadataSizeBuffer[0]);
 
 	if (metadataSize == 0) {
 		return;

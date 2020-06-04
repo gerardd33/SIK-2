@@ -43,6 +43,7 @@ private:
 	static const unsigned int DEFAULT_TIMEOUT = 5;
 
 	void parseArguments(int argc, const char** argv);
+	void assignArgument(char argumentFlag, const char* argumentValue);
 };
 
 #endif //RADIOINFO_HPP_

@@ -1,8 +1,5 @@
 #include "RequestSender.hpp"
 
-RequestSender::RequestSender(RadioInfo& radioInfo, FILE* socketFile) : radioInfo(radioInfo), socketFile(socketFile) {
-}
-
 void RequestSender::sendInitialHeaders() {
 	if (fprintf(socketFile, INITIAL_HEADERS_FORMAT,
 		radioInfo.getRadioResourcePath(), radioInfo.getRadioHost()) < 0) {
@@ -11,7 +8,7 @@ void RequestSender::sendInitialHeaders() {
 }
 
 void RequestSender::requestMetadata() {
-	if (fprintf(socketFile, METADATA_REQUEST, (int)this->radioInfo.isRequestMetadata(),
+	if (fprintf(socketFile, METADATA_REQUEST, (int) this->radioInfo.isRequestMetadata(),
 				radioInfo.getRadioResourcePath(), radioInfo.getRadioHost()) < 0) {
 		ErrorHandler::fatal("Sending HTTP request");
 	}
