@@ -65,6 +65,8 @@ void RadioInfo::parseArguments(int argc, const char** argv) {
 				default:
 					ErrorHandler::usage();
 			}
+		} else if (argv[argId][0] == '-') { // A value of the argument.
+			ErrorHandler::usage();
 		}
 	}
 }
