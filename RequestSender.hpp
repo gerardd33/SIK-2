@@ -5,8 +5,7 @@
 
 class RequestSender {
 public:
-	RequestSender(InputData& inputData, FILE* radioSocketFile) : inputData(inputData),
-		radioSocketFile(radioSocketFile) {}
+	RequestSender(InputData& inputData, FILE* radioSocketFile) : inputData(inputData), radioSocketFile(radioSocketFile) {}
 	void sendRequest();
 
 private:

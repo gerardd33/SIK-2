@@ -59,7 +59,7 @@ private:
 	const char* broadcastMulticastAddress;
 	unsigned int broadcastTimeout;
 
-	static const unsigned int DEFAULT_TIMEOUT = 5;
+	static const unsigned int DEFAULT_RADIO_TIMEOUT = 5;
 
 	void parseArguments(int argc, const char** argv);
 	void assignArgument(char argumentFlag, const char* argumentValue);
