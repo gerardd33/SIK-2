@@ -1,15 +1,15 @@
 #ifndef REQUESTSENDER_HPP_
 #define REQUESTSENDER_HPP_
 
-#include "InputData.hpp"
+#include "RadioInfo.hpp"
 
 class RequestSender {
 public:
-	RequestSender(InputData& radioInfo, FILE* radioSocketFile) : radioInfo(radioInfo), radioSocketFile(radioSocketFile) {}
+	RequestSender(RadioInfo& radioInfo, FILE* radioSocketFile) : radioInfo(radioInfo), radioSocketFile(radioSocketFile) {}
 	void sendRequest();
 
 private:
-	InputData& radioInfo;
+	RadioInfo& radioInfo;
 	FILE* radioSocketFile;
 
 	const char* INITIAL_HEADERS_FORMAT = "GET %s HTTP/1.0\r\n"

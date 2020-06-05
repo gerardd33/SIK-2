@@ -1,15 +1,15 @@
-#ifndef INPUTDATA_HPP_
-#define INPUTDATA_HPP_
+#ifndef RADIOINFO_HPP_
+#define RADIOINFO_HPP_
 
 #include "ErrorHandler.hpp"
 #include <cstdio>
 #include <cstring>
 #include <cerrno>
 
-class InputData {
+class RadioInfo {
 public:
-	InputData(int argc, const char** argv);
-	~InputData();
+	RadioInfo(int argc, const char** argv);
+	~RadioInfo();
 
 	const char* getRadioHost() {
 		return radioHost;
@@ -59,4 +59,4 @@ private:
 	void assignArgument(char argumentFlag, const char* argumentValue);
 };
 
-#endif //INPUTDATA_HPP_
+#endif //RADIOINFO_HPP_

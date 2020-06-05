@@ -2,13 +2,13 @@
 #define RESPONSEPROCESSOR_HPP_
 
 #include "ErrorHandler.hpp"
-#include "InputData.hpp"
+#include "RadioInfo.hpp"
 #include <cctype>
 #include <vector>
 
 class ResponseProcessor {
 public:
-	ResponseProcessor(InputData& radioInfo, FILE* radioSocketFile, FILE* broadcastSocketFile);
+	ResponseProcessor(RadioInfo& radioInfo, FILE* radioSocketFile, FILE* broadcastSocketFile);
 	void processServerResponse();
 
 private:

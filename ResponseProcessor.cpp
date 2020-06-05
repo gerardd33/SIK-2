@@ -127,7 +127,7 @@ void ResponseProcessor::checkIfMetadataInterval(char* line) {
 	}
 }
 
-ResponseProcessor::ResponseProcessor(InputData& radioInfo, FILE* radioSocketFile, FILE* broadcastSocketFile) :
+ResponseProcessor::ResponseProcessor(RadioInfo& radioInfo, FILE* radioSocketFile, FILE* broadcastSocketFile) :
 	radioSocketFile(radioSocketFile), broadcastSocketFile(broadcastSocketFile),
 	requestMetadata(radioInfo.isRequestMetadata()) {
 	if (this->requestMetadata) {
@@ -139,7 +139,6 @@ ResponseProcessor::ResponseProcessor(InputData& radioInfo, FILE* radioSocketFile
 
 void ResponseProcessor::processAudio(char* audioBuffer, size_t dataSize) {
 	// TODO Redirect to broadcaster
-	// TODO check if only part A
 	for (size_t byte = 0; byte < dataSize; ++byte) {
 		printf("%c", audioBuffer[byte]);
 	}
@@ -147,7 +146,6 @@ void ResponseProcessor::processAudio(char* audioBuffer, size_t dataSize) {
 
 void ResponseProcessor::processMetadata(char* metadataBuffer, size_t dataSize) {
 	// TODO Redirect to broadcaster
-	// TODO check if only part A
 	for (size_t byte = 0; byte < dataSize; ++byte) {
 		fprintf(stderr, "%c", metadataBuffer[byte]);
 	}

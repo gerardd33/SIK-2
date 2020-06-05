@@ -40,7 +40,7 @@ UdpClient::~UdpClient() {
 	close(this->socketDescriptor);
 }
 
-UdpClient::UdpClient(InputData& radioInfo) : radioInfo(radioInfo) {
+UdpClient::UdpClient(RadioInfo& radioInfo) : radioInfo(radioInfo) {
 	establishUdpConnection();
 	setTimeout();
 	this->socketFile = fdopen(this->socketDescriptor, "r+");

@@ -1,13 +1,13 @@
 #ifndef UDPCLIENT_HPP_
 #define UDPCLIENT_HPP_
 
-#include "InputData.hpp"
+#include "RadioInfo.hpp"
 #include <netdb.h>
 #include <unistd.h>
 
 class UdpClient {
 public:
-	explicit UdpClient(InputData& radioInfo);
+	explicit UdpClient(RadioInfo& radioInfo);
 	~UdpClient();
 
 	FILE* getSocketFile() {
@@ -15,7 +15,7 @@ public:
 	}
 
 private:
-	InputData& radioInfo;
+	RadioInfo& radioInfo;
 	FILE* socketFile;
 	int socketDescriptor;
 
