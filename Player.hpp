@@ -3,9 +3,9 @@
 
 #include "InputData.hpp"
 #include "TcpClient.hpp"
-#include "UdpClient.hpp"
 #include "RequestSender.hpp"
 #include "ResponseProcessor.hpp"
+#include "Broadcaster.hpp"
 
 class Player {
 public:
