@@ -10,7 +10,7 @@ void Player::run() {
 	RequestSender requestSender(radioInfo, radioSocketFile);
 	requestSender.sendRequest();
 
-	ResponseProcessor responseProcessor(radioInfo, radioSocketFile);
+	ResponseProcessor responseProcessor(radioInfo, radioSocketFile, broadcastSocketFile);
 	responseProcessor.processServerResponse();
 }
 
