@@ -16,6 +16,8 @@ Broadcaster::Broadcaster(InputData& inputData) : inputData(inputData), broadcast
 	UdpClient udpClient(inputData);
 	this->broadcastSocketFile = udpClient.getSocketFile();
 
+	std::thread clientHandler{&Broadcaster::handleClients, this};
+	clientHandler.detach();
 }
 
 Broadcaster::~Broadcaster() {
