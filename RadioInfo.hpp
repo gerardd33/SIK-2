@@ -6,7 +6,6 @@
 #include <cstring>
 #include <cerrno>
 
-
 class RadioInfo {
 public:
 	RadioInfo(int argc, const char** argv);
@@ -31,7 +30,6 @@ public:
 	bool isRequestMetadata() {
 		return requestMetadata;
 	}
-
 
 private:
 	const char* radioHost;

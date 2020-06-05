@@ -4,7 +4,6 @@
 #include "RadioInfo.hpp"
 #include <netdb.h>
 #include <unistd.h>
-#include <cstdio>
 
 class TcpClient {
 public:

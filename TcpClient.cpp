@@ -40,8 +40,8 @@ struct addrinfo* TcpClient::getAddressInfo() {
 }
 
 TcpClient::~TcpClient() {
-	fclose(socketFile);
-	close(socketDescriptor);
+	fclose(this->socketFile);
+	close(this->socketDescriptor);
 }
 
 void TcpClient::setTimeout() {
