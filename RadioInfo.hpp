@@ -31,27 +31,12 @@ public:
 		return requestMetadata;
 	}
 
-	const char* getBroadcastPort() {
-		return broadcastPort;
-	}
-
-	const char* getBroadcastMulticastAddress() {
-		return broadcastMulticastAddress;
-	}
-
-	unsigned int getBroadcastTimeout() {
-		return broadcastTimeout;
-	}
-
 private:
 	const char* radioHost;
 	const char* radioResourcePath;
 	const char* radioPort;
 	unsigned int radioTimeout;
 	bool requestMetadata;
-	const char* broadcastPort;
-	const char* broadcastMulticastAddress;
-	unsigned int broadcastTimeout;
 
 	static const unsigned int DEFAULT_RADIO_TIMEOUT = 5;
 
