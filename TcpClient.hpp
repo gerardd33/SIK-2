@@ -1,13 +1,13 @@
 #ifndef TCPCLIENT_HPP_
 #define TCPCLIENT_HPP_
 
-#include "RadioInfo.hpp"
+#include "InputData.hpp"
 #include <netdb.h>
 #include <unistd.h>
 
 class TcpClient {
 public:
-	explicit TcpClient(RadioInfo& radioInfo);
+	explicit TcpClient(InputData& radioInfo);
 	~TcpClient();
 
 	FILE* getSocketFile() {
@@ -15,7 +15,7 @@ public:
 	}
 
 private:
-	RadioInfo& radioInfo;
+	InputData& radioInfo;
 	FILE* socketFile;
 	int socketDescriptor;
 

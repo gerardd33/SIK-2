@@ -1,6 +1,6 @@
 #include "TcpClient.hpp"
 
-TcpClient::TcpClient(RadioInfo& radioInfo) : radioInfo(radioInfo) {
+TcpClient::TcpClient(InputData& radioInfo) : radioInfo(radioInfo) {
 	establishTcpConnection();
 	setRadioTimeout();
 	this->socketFile = fdopen(this->socketDescriptor, "r+");

@@ -1,7 +1,7 @@
 #include <cstdlib>
-#include "RadioInfo.hpp"
+#include "InputData.hpp"
 
-RadioInfo::RadioInfo(int argc, const char** argv) {
+InputData::InputData(int argc, const char** argv) {
 	// Default values of optional arguments.
 	this->radioTimeout = DEFAULT_RADIO_TIMEOUT;
 	this->requestMetadata = false;
@@ -18,7 +18,7 @@ RadioInfo::RadioInfo(int argc, const char** argv) {
 	}
 }
 
-void RadioInfo::assignArgument(char argumentFlag, const char* argumentValue) {
+void InputData::assignArgument(char argumentFlag, const char* argumentValue) {
 	switch (argumentFlag) {
 		case 'h':
 			this->radioHost = strdup(argumentValue);
@@ -68,7 +68,7 @@ void RadioInfo::assignArgument(char argumentFlag, const char* argumentValue) {
 	}
 }
 
-void RadioInfo::parseArguments(int argc, const char** argv) {
+void InputData::parseArguments(int argc, const char** argv) {
 	for (int argumentId = 1; argumentId < argc; ++argumentId) {
 		if (argumentId % 2 == 1) { // A flag identifying the argument.
 			if (argumentId + 1 >= argc) { // No value for this argument.
@@ -88,7 +88,7 @@ void RadioInfo::parseArguments(int argc, const char** argv) {
 	}
 }
 
-RadioInfo::~RadioInfo() {
+InputData::~InputData() {
 	free((char*) radioHost);
 	free((char*) radioResourcePath);
 	free((char*) radioPort);
