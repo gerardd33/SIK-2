@@ -15,11 +15,12 @@ public:
 	}
 
 private:
+	InputData& inputData;
 	FILE* socketFile;
 	int socketDescriptor;
 
 	void establishUdpConnection();
-	struct addrinfo* getAddressInfo();
+	void bindSocket();
 	void setTimeout();
 };
 

@@ -1,13 +1,20 @@
 #include "UdpClient.hpp"
 
-struct addrinfo* UdpClient::getAddressInfo() {
-	return nullptr;
+void UdpClient::bindSocket() {
+	struct sockaddr_in serverAddress;
+	serverAddress.sin_family = AF_INET;
+	serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);
+	serverAddress.sin_port = htons(inputData.getBroadcastPort());
+
+	if (bind(this->socketDescriptor, (struct sockaddr*) &serverAddress,
+			 (socklen_t) sizeof(serverAddress)) < 0) {
+		ErrorHandler::syserr("bind");
+	}
 }
 
 void UdpClient::setTimeout() {
-	/*
 	struct timeval timeout;
-	timeout.tv_sec = this->inputData.getRadioTimeout();
+	timeout.tv_sec = this->inputData.getBroadcastTimeout();
 	timeout.tv_usec = 0;
 
 	if (setsockopt(this->socketDescriptor, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
@@ -17,11 +24,15 @@ void UdpClient::setTimeout() {
 	if (setsockopt(this->socketDescriptor, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) < 0) {
 		ErrorHandler::syserr("setsockopt");
 	}
-	 */
 }
 
 void UdpClient::establishUdpConnection() {
+	this->socketDescriptor = socket(AF_INET, SOCK_DGRAM, 0);
+	if (socketDescriptor < 0) {
+		ErrorHandler::syserr("socket");
+	}
 
+	bindSocket();
 }
 
 UdpClient::~UdpClient() {
@@ -29,9 +40,8 @@ UdpClient::~UdpClient() {
 	close(this->socketDescriptor);
 }
 
-UdpClient::UdpClient(InputData& inputData) {
+UdpClient::UdpClient(InputData& inputData) : inputData(inputData) {
 	establishUdpConnection();
 	setTimeout();
 	this->socketFile = fdopen(this->socketDescriptor, "r+");
 }
-

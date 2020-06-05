@@ -3,13 +3,22 @@
 
 InputData::InputData(int argc, const char** argv) : radioTimeout(DEFAULT_TIMEOUT), requestMetadata(false),
 													radioHost(nullptr), radioResourcePath(nullptr), radioPort(nullptr), broadcasting(false),
-													broadcastPort(nullptr), broadcastMulticastAddress(nullptr), broadcastTimeout(DEFAULT_TIMEOUT) {
+													broadcastPort(0), broadcastMulticastAddress(nullptr), broadcastTimeout(DEFAULT_TIMEOUT) {
 	parseArguments(argc, argv);
 
 	// Any of the required arguments is absent.
 	if (this->radioHost == nullptr || this->radioResourcePath == nullptr || this->radioPort == nullptr) {
 		ErrorHandler::usage();
 	}
+}
+
+int InputData::convertToInteger(const char* string) {
+	int result = static_cast<int>(strtol(string, nullptr, 10));
+	if (errno != 0) { // Invalid number.
+		ErrorHandler::usage();
+	}
+
+	return result;
 }
 
 void InputData::assignArgument(char argumentFlag, const char* argumentValue) {
@@ -37,15 +46,18 @@ void InputData::assignArgument(char argumentFlag, const char* argumentValue) {
 			break;
 
 		case 't':
-			this->radioTimeout = static_cast<int>(strtol(argumentValue, nullptr, 10));
-			if (errno != 0 || this->radioTimeout <= 0) { // Invalid number.
+			this->radioTimeout = convertToInteger(argumentValue);
+			if (this->radioTimeout <= 0) {
 				ErrorHandler::usage();
 			}
 			break;
 
 		case 'P':
-			this->broadcastPort = strdup(argumentValue);
 			this->broadcasting = true;
+			this->broadcastPort = convertToInteger(argumentValue);
+			if (this->broadcastPort < 0) {
+				ErrorHandler::usage();
+			}
 			break;
 
 		case 'B':
@@ -53,8 +65,8 @@ void InputData::assignArgument(char argumentFlag, const char* argumentValue) {
 			break;
 
 		case 'T':
-			this->broadcastTimeout = static_cast<int>(strtol(argumentValue, nullptr, 10));
-			if (errno != 0 || this->broadcastTimeout <= 0) { // Invalid number.
+			this->broadcastTimeout = convertToInteger(argumentValue);
+			if (this->broadcastTimeout <= 0) {
 				ErrorHandler::usage();
 			}
 			break;

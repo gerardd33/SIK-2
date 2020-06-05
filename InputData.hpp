@@ -35,13 +35,14 @@ public:
 		return broadcasting;
 	}
 
-	const char* getBroadcastPort() {
-		return broadcastPort;
-	}
-
 	const char* getBroadcastMulticastAddress() {
 		return broadcastMulticastAddress;
 	}
+
+	unsigned int getBroadcastPort() {
+		return broadcastPort;
+	}
+
 
 	unsigned int getBroadcastTimeout() {
 		return broadcastTimeout;
@@ -55,14 +56,15 @@ private:
 	unsigned int radioTimeout;
 
 	bool broadcasting;
-	const char* broadcastPort;
 	const char* broadcastMulticastAddress;
+	unsigned int broadcastPort;
 	unsigned int broadcastTimeout;
 
 	static const unsigned int DEFAULT_TIMEOUT = 5;
 
 	void parseArguments(int argc, const char** argv);
 	void assignArgument(char argumentFlag, const char* argumentValue);
+	int convertToInteger(const char* string);
 };
 
 #endif //INPUTDATA_HPP_
