@@ -8,17 +8,77 @@ long long Broadcaster::getLastContactTime(std::pair<sockaddr_in, long long> mapE
 	return mapEntry.second;
 }
 
-void Broadcaster::handleClients() {
-	while (this->interrupted) {
-
+bool Broadcaster::checkReceivedErrorType(ssize_t receivedLength) {
+	if (receivedLength < 0) {
+		if (errno == EINPROGRESS || errno == EAGAIN || errno == EWOULDBLOCK) {
+			return true; // continue;
+		} else {
+			ErrorHandler::syserr("recvfrom");
+		}
+	} else if (receivedLength == 0) {
+		interrupt();
+		return false; // return;
 	}
 }
 
-Broadcaster::Broadcaster(InputData& inputData) : inputData(inputData), broadcastSocketFile(nullptr),
-	interrupted(false) {
-	UdpClient udpClient(inputData);
-	this->broadcastSocketFile = udpClient.getSocketFile();
+void Broadcaster::handleClients() {
+	// TODO podziel lepiej na funkcje, przenies niektore odpowiedzialnosci do UDP
 
+	struct sockaddr_in clientAddress;
+	char messageFromClientBuffer[MESSAGE_FROM_CLIENT_BUFFER_SIZE];
+
+	int socketDescriptor = this->udpConnection.getSocketDescriptor();
+	while (!this->interrupted) {
+		socklen_t clientAddressLength = (socklen_t) sizeof(clientAddress);
+		ssize_t receivedLength = recvfrom(socketDescriptor, messageFromClientBuffer, sizeof(messageFromClientBuffer),
+							  0, (struct sockaddr*) &clientAddress, &clientAddressLength);
+
+		if (receivedLength <= 0) {
+			if (checkReceivedErrorType(receivedLength)) {
+				return;
+			} else {
+				continue;
+			}
+		}
+
+		// zmien nazwe bufora
+
+		// TODO zmien i ladniej
+		uint16_t messageType = ntohs(*((uint16_t*) messageFromClientBuffer));
+		switch (messageType) {
+			case DISCOVER:
+				*((uint16_t) messageFromClientBuffer) = htons(IAM);
+				*((uint16_t) (messageFromClientBuffer + 2)) = htons(radioname.size);
+				strcpy(messageFromClientBuffer + 4, radioname);
+
+				responseLength = radioname.size + 4
+				ssize_t sentLength = sendto(socketDescriptor, messageFromClientBuffer, responseLength, 0,
+											(struct sockaddr*) &clientAddress, clientAddressLength);
+
+				if (sentLength < 0) {
+					//syserr
+				}
+
+				timeval tp;
+				timeMapMutex.lock();
+				gettimeofday(&tp, nullptr);
+				uint64_t ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+				timeMap[client_address] = ms;
+				timeMapMutex.unlock();
+
+			case KEEPALIVE:
+				// ...
+			default:
+				// ...
+		}
+	}
+}
+
+Broadcaster::Broadcaster(InputData& inputData) : inputData(inputData), interrupted(false),
+	udpConnection(inputData) {
+	// TODO multicast
+
+	// TODO jesli bedzie dzialac, przesun do initialisation list
 	this->clientHandler = std::thread(&Broadcaster::handleClients, this);
 }
 

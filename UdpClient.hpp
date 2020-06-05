@@ -10,18 +10,20 @@ public:
 	explicit UdpClient(InputData& inputData);
 	~UdpClient();
 
-	FILE* getSocketFile() {
-		return socketFile;
+	int getSocketDescriptor() {
+		return socketDescriptor;
 	}
 
 private:
 	InputData& inputData;
-	FILE* socketFile;
 	int socketDescriptor;
+	struct sockaddr_in serverAddress;
 
 	void establishUdpConnection();
 	void bindSocket();
 	void setTimeout();
+
+	const unsigned int DEFAULT_TIMEOUT = 1;
 };
 
 #endif //UDPCLIENT_HPP_

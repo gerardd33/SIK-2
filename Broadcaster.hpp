@@ -21,7 +21,7 @@ public:
 
 private:
 	InputData& inputData;
-	FILE* broadcastSocketFile;
+	UdpClient udpConnection;
 	bool interrupted;
 
 	LastContactMap lastContactMap;
@@ -30,6 +30,10 @@ private:
 
 	std::thread clientHandler;
 	void handleClients();
+
+	bool checkReceivedErrorType(ssize_t receivedLength);
+
+	unsigned int MESSAGE_FROM_CLIENT_BUFFER_SIZE = 1024;
 };
 
 #endif //BROADCASTER_HPP_
