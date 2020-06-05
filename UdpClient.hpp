@@ -1,22 +1,20 @@
-#ifndef TCPCLIENT_HPP_
-#define TCPCLIENT_HPP_
+#ifndef UDPCLIENT_HPP_
+#define UDPCLIENT_HPP_
 
-#include "RadioInfo.hpp"
 #include <netdb.h>
 #include <unistd.h>
 #include <cstdio>
 
-class TcpClient {
+class UdpClient {
 public:
-	explicit TcpClient(RadioInfo& radioInfo);
-	~TcpClient();
+	explicit UdpClient();
+	~UdpClient();
 
 	FILE* getSocketFile() {
 		return socketFile;
 	}
 
 private:
-	RadioInfo& radioInfo;
 	FILE* socketFile;
 	int socketDescriptor;
 
@@ -25,4 +23,4 @@ private:
 	void setTimeout();
 };
 
-#endif //TCPCLIENT_HPP_
+#endif //UDPCLIENT_HPP_

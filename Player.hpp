@@ -3,6 +3,7 @@
 
 #include "RadioInfo.hpp"
 #include "TcpClient.hpp"
+#include "UdpClient.hpp"
 #include "RequestSender.hpp"
 #include "ResponseProcessor.hpp"
 

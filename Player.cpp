@@ -4,10 +4,8 @@ void Player::run() {
 	TcpClient tcpClient(radioInfo);
 	FILE* radioSocketFile = tcpClient.getSocketFile();
 
-	/*
 	UdpClient udpClient();
-	FILE*
-	*/
+	FILE* broadcastSocketFile = udpClient.getSocketFile();
 
 	RequestSender requestSender(radioInfo, radioSocketFile);
 	requestSender.sendRequest();
