@@ -123,7 +123,8 @@ void ResponseProcessor::convertHeaderNameToLowercase(char* line) {
 
 void ResponseProcessor::checkIfMetadataInterval(char* line) {
 	size_t readValue;
-	int sscanfResult = sscanf(line, "icy-metaint:%zu[\r\n]", &readValue);
+	int sscanfResult = sscanf(line, "icy-metaint%*[: ]%zu[\r\n]", &readValue);
+
 	if (sscanfResult > 0) {
 		this->dataChunkSize = readValue;
 	}

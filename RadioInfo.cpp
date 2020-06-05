@@ -20,19 +20,19 @@ RadioInfo::RadioInfo(int argc, const char** argv) {
 
 void RadioInfo::assignArgument(char argumentFlag, const char* argumentValue) {
 	switch (argumentFlag) {
-		case 'h':
+		case 'h': // Host
 			this->radioHost = strdup(argumentValue);
 			break;
 
-		case 'r':
+		case 'r': // Resource
 			this->radioResourcePath = strdup(argumentValue);
 			break;
 
-		case 'p':
+		case 'p': // Port
 			this->radioPort = strdup(argumentValue);
 			break;
 
-		case 'm':
+		case 'm': // Metadata
 			if (strcmp(argumentValue, "yes") == 0) {
 				this->requestMetadata = true;
 			} else if (strcmp(argumentValue, "no") == 0) {
@@ -42,7 +42,7 @@ void RadioInfo::assignArgument(char argumentFlag, const char* argumentValue) {
 			}
 			break;
 
-		case 't':
+		case 't': // Timeout
 			this->timeout = static_cast<int>(strtol(argumentValue, nullptr, 10));
 			if (errno != 0 || this->timeout <= 0) { // Invalid number.
 				ErrorHandler::usage();
