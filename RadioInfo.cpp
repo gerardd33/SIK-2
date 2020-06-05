@@ -1,15 +1,9 @@
 #include <cstdlib>
 #include "RadioInfo.hpp"
 
-RadioInfo::RadioInfo(int argc, const char** argv) {
-	// Default values of optional arguments.
-	this->radioTimeout = DEFAULT_RADIO_TIMEOUT;
-	this->requestMetadata = false;
-
-	this->radioHost = nullptr;
-	this->radioResourcePath = nullptr;
-	this->radioPort = nullptr;
-
+RadioInfo::RadioInfo(int argc, const char** argv) : radioTimeout(DEFAULT_TIMEOUT), requestMetadata(false),
+	radioHost(nullptr), radioResourcePath(nullptr), radioPort(nullptr), broadcasting(false),
+	broadcastPort(nullptr), broadcastMulticastAddress(nullptr), broadcastTimeout(DEFAULT_TIMEOUT) {
 	parseArguments(argc, argv);
 
 	// Any of the required arguments is absent.
@@ -20,19 +14,19 @@ RadioInfo::RadioInfo(int argc, const char** argv) {
 
 void RadioInfo::assignArgument(char argumentFlag, const char* argumentValue) {
 	switch (argumentFlag) {
-		case 'h': // Host
+		case 'h':
 			this->radioHost = strdup(argumentValue);
 			break;
 
-		case 'r': // Resource
+		case 'r':
 			this->radioResourcePath = strdup(argumentValue);
 			break;
 
-		case 'p': // Port
+		case 'p':
 			this->radioPort = strdup(argumentValue);
 			break;
 
-		case 'm': // Metadata
+		case 'm':
 			if (strcmp(argumentValue, "yes") == 0) {
 				this->requestMetadata = true;
 			} else if (strcmp(argumentValue, "no") == 0) {
@@ -42,9 +36,25 @@ void RadioInfo::assignArgument(char argumentFlag, const char* argumentValue) {
 			}
 			break;
 
-		case 't': // Radio timeout
+		case 't':
 			this->radioTimeout = static_cast<int>(strtol(argumentValue, nullptr, 10));
 			if (errno != 0 || this->radioTimeout <= 0) { // Invalid number.
+				ErrorHandler::usage();
+			}
+			break;
+
+		case 'P':
+			this->broadcastPort = strdup(argumentValue);
+			this->broadcasting = true;
+			break;
+
+		case 'B':
+			this->broadcastMulticastAddress = strdup(argumentValue);
+			break;
+
+		case 'T':
+			this->broadcastTimeout = static_cast<int>(strtol(argumentValue, nullptr, 10));
+			if (errno != 0 || this->broadcastTimeout <= 0) { // Invalid number.
 				ErrorHandler::usage();
 			}
 			break;

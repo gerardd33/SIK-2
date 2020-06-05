@@ -1,7 +1,9 @@
 #include "ErrorHandler.hpp"
 
 void ErrorHandler::usage() {
-	fprintf(stderr, "Usage: ./radio-proxy -h host -r resource -p port [-m yes|no] [-t timeout]\n");
+	fprintf(stderr, "Usage: ./radio-proxy -h radio_host -r radio_resource -p radio_port "
+					"[-m yes|no] [-t radio_timeout] -P broadcast_port "
+					"[-B broadcast_multicast_address] [-T broadcast_timeout]\n");
 	exit(1);
 }
 
