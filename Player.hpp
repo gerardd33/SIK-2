@@ -1,7 +1,7 @@
 #ifndef PLAYER_HPP_
 #define PLAYER_HPP_
 
-#include "RadioInfo.hpp"
+#include "InputData.hpp"
 #include "TcpClient.hpp"
 #include "UdpClient.hpp"
 #include "RequestSender.hpp"
@@ -9,11 +9,11 @@
 
 class Player {
 public:
-	Player(int argc, const char** argv) : radioInfo(argc, argv) {}
+	Player(int argc, const char** argv) : inputData(argc, argv) {}
 	void run();
 
 private:
-	RadioInfo radioInfo;
+	InputData inputData;
 };
 
 #endif //PLAYER_HPP_

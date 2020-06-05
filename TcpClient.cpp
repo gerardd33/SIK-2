@@ -1,6 +1,6 @@
 #include "TcpClient.hpp"
 
-TcpClient::TcpClient(RadioInfo& radioInfo) : radioInfo(radioInfo) {
+TcpClient::TcpClient(InputData& inputData) : inputData(inputData) {
 	establishTcpConnection();
 	setRadioTimeout();
 	this->socketFile = fdopen(this->socketDescriptor, "r+");
@@ -30,7 +30,7 @@ struct addrinfo* TcpClient::getAddressInfo() {
 	addressHints.ai_socktype = SOCK_STREAM;
 	addressHints.ai_protocol = IPPROTO_TCP;
 
-	if (getaddrinfo(this->radioInfo.getRadioHost(), this->radioInfo.getRadioPort(),
+	if (getaddrinfo(this->inputData.getRadioHost(), this->inputData.getRadioPort(),
 		&addressHints, &addressResult) != 0) {
 		ErrorHandler::fatal("Failed to find address");
 	}
@@ -45,7 +45,7 @@ TcpClient::~TcpClient() {
 
 void TcpClient::setRadioTimeout() {
 	struct timeval timeout;
-	timeout.tv_sec = this->radioInfo.getRadioTimeout();
+	timeout.tv_sec = this->inputData.getRadioTimeout();
 	timeout.tv_usec = 0;
 
 	if (setsockopt(this->socketDescriptor, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {

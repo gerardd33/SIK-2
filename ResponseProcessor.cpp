@@ -128,8 +128,8 @@ void ResponseProcessor::checkIfMetadataInterval(char* line) {
 	}
 }
 
-ResponseProcessor::ResponseProcessor(RadioInfo& radioInfo, FILE* radioSocketFile) : radioSocketFile(radioSocketFile),
-	requestMetadata(radioInfo.isRequestMetadata()) {
+ResponseProcessor::ResponseProcessor(InputData& inputData, FILE* radioSocketFile) : radioSocketFile(radioSocketFile),
+																					requestMetadata(inputData.isRequestMetadata()) {
 	if (this->requestMetadata) {
 		this->dataChunkSize = -1;
 	} else {
