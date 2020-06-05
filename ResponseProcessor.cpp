@@ -128,8 +128,8 @@ void ResponseProcessor::checkIfMetadataInterval(char* line) {
 	}
 }
 
-ResponseProcessor::ResponseProcessor(InputData& inputData, FILE* radioSocketFile) : inputData(inputData),
-	radioSocketFile(radioSocketFile) {
+ResponseProcessor::ResponseProcessor(InputData& inputData, FILE* radioSocketFile, Broadcaster& broadcaster) :
+	inputData(inputData), radioSocketFile(radioSocketFile), broadcaster(broadcaster) {
 	if (this->inputData.isRequestMetadata()) {
 		this->dataChunkSize = -1;
 	} else {
@@ -139,7 +139,7 @@ ResponseProcessor::ResponseProcessor(InputData& inputData, FILE* radioSocketFile
 
 void ResponseProcessor::processAudio(char* audioBuffer, size_t dataSize) {
 	if (this->inputData.isBroadcasting()) {
-		// TODO broadcast
+		this->broadcaster.broadcastAudio(audioBuffer, dataSize);
 	} else {
 		printString(stdout, audioBuffer, dataSize);
 	}
@@ -147,7 +147,7 @@ void ResponseProcessor::processAudio(char* audioBuffer, size_t dataSize) {
 
 void ResponseProcessor::processMetadata(char* metadataBuffer, size_t dataSize) {
 	if (this->inputData.isBroadcasting()) {
-		// TODO broadcast
+		this->broadcaster.broadcastMetadata(metadataBuffer, dataSize);
 	} else {
 		printString(stderr, metadataBuffer, dataSize);
 		fprintf(stderr, "\n");

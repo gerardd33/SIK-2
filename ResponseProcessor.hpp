@@ -3,16 +3,18 @@
 
 #include "ErrorHandler.hpp"
 #include "InputData.hpp"
+#include "Broadcaster.hpp"
 #include <cctype>
 #include <vector>
 
 class ResponseProcessor {
 public:
-	ResponseProcessor(InputData& inputData, FILE* radioSocketFile);
+	ResponseProcessor(InputData& inputData, FILE* radioSocketFile, Broadcaster& broadcaster);
 	void processServerResponse();
 
 private:
 	InputData& inputData;
+	Broadcaster& broadcaster;
 	FILE* radioSocketFile;
 	size_t dataChunkSize;
 

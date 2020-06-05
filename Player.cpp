@@ -9,7 +9,7 @@ void Player::run() {
 	RequestSender requestSender(inputData, radioSocketFile);
 	requestSender.sendRequest();
 
-	ResponseProcessor responseProcessor(inputData, radioSocketFile);
+	ResponseProcessor responseProcessor(inputData, radioSocketFile, broadcaster);
 	responseProcessor.processServerResponse();
 }
 

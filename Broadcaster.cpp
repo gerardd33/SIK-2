@@ -16,10 +16,17 @@ Broadcaster::Broadcaster(InputData& inputData) : inputData(inputData), broadcast
 	UdpClient udpClient(inputData);
 	this->broadcastSocketFile = udpClient.getSocketFile();
 
-	std::thread clientHandler{&Broadcaster::handleClients, this};
-	clientHandler.detach();
+	this->clientHandler = std::thread(&Broadcaster::handleClients, this);
 }
 
 Broadcaster::~Broadcaster() {
-	// ...
+	this->clientHandler.join();
+}
+
+void Broadcaster::broadcastAudio(const char* audioBuffer, size_t dataSize) {
+	fprintf(stderr, "broadcasting audio\n");
+}
+
+void Broadcaster::broadcastMetadata(const char* metadataBuffer, size_t dataSize) {
+	fprintf(stderr, "broadcasting metadata\n");
 }

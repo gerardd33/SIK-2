@@ -13,6 +13,8 @@ class Broadcaster {
 public:
 	explicit Broadcaster(InputData& inputData);
 	~Broadcaster();
+	void broadcastAudio(const char* audioBuffer, size_t dataSize);
+	void broadcastMetadata(const char* metadataBuffer, size_t dataSize);
 
 private:
 	InputData& inputData;
@@ -22,6 +24,7 @@ private:
 	sockaddr_in getClientAddress(std::pair<sockaddr_in, long long> mapEntry);
 	long long getLastContactTime(std::pair<sockaddr_in, long long> mapEntry);
 
+	std::thread clientHandler;
 	void handleClients();
 };
 
