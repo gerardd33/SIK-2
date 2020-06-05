@@ -138,11 +138,12 @@ ResponseProcessor::ResponseProcessor(RadioInfo& radioInfo, FILE* radioSocketFile
 }
 
 void ResponseProcessor::processAudio(char* audioBuffer, size_t dataSize) {
-
+	printString(stdout, audioBuffer, dataSize);
 }
 
 void ResponseProcessor::processMetadata(char* metadataBuffer, size_t dataSize) {
-
+	printString(stderr, metadataBuffer, dataSize);
+	fprintf(stderr, "\n");
 }
 
 void ResponseProcessor::processServerResponse() {
