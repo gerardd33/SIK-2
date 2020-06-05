@@ -14,7 +14,7 @@ void UdpClient::bindSocket() {
 
 void UdpClient::setTimeout() {
 	struct timeval timeout;
-	timeout.tv_sec = this->inputData.getBroadcastTimeout();
+	timeout.tv_sec = this->radioInfo.getBroadcastTimeout();
 	timeout.tv_usec = 0;
 
 	if (setsockopt(this->socketDescriptor, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
@@ -40,7 +40,7 @@ UdpClient::~UdpClient() {
 	close(this->socketDescriptor);
 }
 
-UdpClient::UdpClient(InputData& inputData) : inputData(inputData) {
+UdpClient::UdpClient(InputData& radioInfo) : radioInfo(radioInfo) {
 	establishUdpConnection();
 	setTimeout();
 	this->socketFile = fdopen(this->socketDescriptor, "r+");

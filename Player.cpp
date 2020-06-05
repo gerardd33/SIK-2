@@ -1,16 +1,16 @@
 #include "Player.hpp"
 
 void Player::run() {
-	TcpClient tcpClient(inputData);
+	TcpClient tcpClient(radioInfo);
 	FILE* radioSocketFile = tcpClient.getSocketFile();
 
-	UdpClient udpClient(inputData);
+	UdpClient udpClient(radioInfo);
 	FILE* broadcastSocketFile = udpClient.getSocketFile();
 
-	RequestSender requestSender(inputData, radioSocketFile);
+	RequestSender requestSender(radioInfo, radioSocketFile);
 	requestSender.sendRequest();
 
-	ResponseProcessor responseProcessor(inputData, radioSocketFile, broadcastSocketFile);
+	ResponseProcessor responseProcessor(radioInfo, radioSocketFile, broadcastSocketFile);
 	responseProcessor.processServerResponse();
 }
 

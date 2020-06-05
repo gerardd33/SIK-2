@@ -5,7 +5,6 @@ InputData::InputData(int argc, const char** argv) {
 	// Default values of optional arguments.
 	this->radioTimeout = DEFAULT_RADIO_TIMEOUT;
 	this->requestMetadata = false;
-	this->broadcasting = false;
 
 	this->radioHost = nullptr;
 	this->radioResourcePath = nullptr;
@@ -14,8 +13,7 @@ InputData::InputData(int argc, const char** argv) {
 	parseArguments(argc, argv);
 
 	// Any of the required arguments is absent.
-	if (this->radioHost == nullptr || this->radioResourcePath == nullptr || this->radioPort == nullptr
-		|| (!this->broadcasting && (this->broadcastTimeout || this->broadcastMulticastAddress))) {
+	if (this->radioHost == nullptr || this->radioResourcePath == nullptr || this->radioPort == nullptr) {
 		ErrorHandler::usage();
 	}
 }
@@ -53,7 +51,6 @@ void InputData::assignArgument(char argumentFlag, const char* argumentValue) {
 
 		case 'P':
 			this->broadcastPort = strdup(argumentValue);
-			this->broadcasting = true;
 			break;
 
 		case 'B':

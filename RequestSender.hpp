@@ -5,11 +5,11 @@
 
 class RequestSender {
 public:
-	RequestSender(InputData& inputData, FILE* radioSocketFile) : inputData(inputData), radioSocketFile(radioSocketFile) {}
+	RequestSender(InputData& radioInfo, FILE* radioSocketFile) : radioInfo(radioInfo), radioSocketFile(radioSocketFile) {}
 	void sendRequest();
 
 private:
-	InputData& inputData;
+	InputData& radioInfo;
 	FILE* radioSocketFile;
 
 	const char* INITIAL_HEADERS_FORMAT = "GET %s HTTP/1.0\r\n"

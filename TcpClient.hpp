@@ -7,7 +7,7 @@
 
 class TcpClient {
 public:
-	explicit TcpClient(InputData& inputData);
+	explicit TcpClient(InputData& radioInfo);
 	~TcpClient();
 
 	FILE* getSocketFile() {
@@ -15,7 +15,7 @@ public:
 	}
 
 private:
-	InputData& inputData;
+	InputData& radioInfo;
 	FILE* socketFile;
 	int socketDescriptor;
 
