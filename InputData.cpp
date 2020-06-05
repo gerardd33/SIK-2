@@ -1,21 +1,27 @@
 #include <cstdlib>
 #include "InputData.hpp"
 
-InputData::InputData(int argc, const char** argv) {
-	// Default values of optional arguments.
-	this->radioTimeout = DEFAULT_RADIO_TIMEOUT;
-	this->requestMetadata = false;
-	this->broadcasting = false;
-
-	this->radioHost = nullptr;
-	this->radioResourcePath = nullptr;
-	this->radioPort = nullptr;
+InputData::InputData(int argc, const char** argv) : requestMetadata(false), radioTimeout(DEFAULT_TIMEOUT),
+	radioHost(nullptr), radioResourcePath(nullptr), radioPort(nullptr), broadcasting(false),
+	broadcastTimeout(DEFAULT_TIMEOUT), broadcastPort(nullptr), broadcastMulticastAddress(nullptr) {
 
 	parseArguments(argc, argv);
 
+	// TODO usun komentarz
+	/*
+		fprintf(stderr, "Host: %s:\n", getRadioHost());
+		fprintf(stderr, "Resource: %s:\n", getRadioResourcePath());
+		fprintf(stderr, "Radio port: %s\n", getRadioPort());
+		fprintf(stderr, "Radio timeout: %d\n", getRadioTimeout());
+		fprintf(stderr, "Request metadata?: %d\n", isRequestMetadata());
+		fprintf(stderr, "Broadcast port: %s\n", getBroadcastPort());
+		fprintf(stderr, "Multicast: %s\n", getBroadcastMulticastAddress());
+		fprintf(stderr, "Broadcast timeout: %d\n", getBroadcastTimeout());
+		fprintf(stderr, "Broadcasting?: %d\n", isBroadcasting());
+	 */
+
 	// Any of the required arguments is absent.
-	if (this->radioHost == nullptr || this->radioResourcePath == nullptr || this->radioPort == nullptr
-		|| (!this->broadcasting && (this->broadcastTimeout || this->broadcastMulticastAddress))) {
+	if (this->radioHost == nullptr || this->radioResourcePath == nullptr || this->radioPort == nullptr) {
 		ErrorHandler::usage();
 	}
 }
@@ -58,6 +64,7 @@ void InputData::assignArgument(char argumentFlag, const char* argumentValue) {
 
 		case 'B':
 			this->broadcastMulticastAddress = strdup(argumentValue);
+			break;
 
 		case 'T':
 			this->broadcastTimeout = static_cast<int>(strtol(argumentValue, nullptr, 10));
@@ -95,4 +102,11 @@ InputData::~InputData() {
 	free((char*) radioHost);
 	free((char*) radioResourcePath);
 	free((char*) radioPort);
+	if (broadcastPort != nullptr) {
+		free((char*) broadcastPort);
+	}
+
+	if (broadcastMulticastAddress != nullptr) {
+		free((char*) broadcastMulticastAddress);
+	}
 }

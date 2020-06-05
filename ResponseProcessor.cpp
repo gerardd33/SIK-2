@@ -155,6 +155,9 @@ void ResponseProcessor::processMetadata(char* metadataBuffer, size_t dataSize) {
 
 void ResponseProcessor::processServerResponse() {
 	readStatusLine();
+	fprintf(stderr, "\n1\n");
 	readHeaders();
+	fprintf(stderr, "\n2\n");
 	readData();
+	fprintf(stderr, "\n3\n");
 }
