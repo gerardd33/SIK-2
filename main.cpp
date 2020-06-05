@@ -1,5 +1,5 @@
-#include <iostream>
 #include "Player.hpp"
+#include <iostream>
 
 int main(int argc, const char** argv) {
 	std::cerr << "Started running." << std::endl;

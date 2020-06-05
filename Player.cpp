@@ -2,12 +2,17 @@
 
 void Player::run() {
 	TcpClient tcpClient(radioInfo);
-	FILE* socketFile = tcpClient.getSocketFile();
+	FILE* radioSocketFile = tcpClient.getSocketFile();
 
-	RequestSender requestSender(radioInfo, socketFile);
+	/*
+	UdpClient udpClient();
+	FILE*
+	*/
+
+	RequestSender requestSender(radioInfo, radioSocketFile);
 	requestSender.sendRequest();
 
-	ResponseProcessor responseProcessor(radioInfo, socketFile);
+	ResponseProcessor responseProcessor(radioInfo, radioSocketFile);
 	responseProcessor.processServerResponse();
 }
 

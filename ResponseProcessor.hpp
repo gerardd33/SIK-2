@@ -8,11 +8,11 @@
 
 class ResponseProcessor {
 public:
-	ResponseProcessor(RadioInfo& radioInfo, FILE* socketFile);
+	ResponseProcessor(RadioInfo& radioInfo, FILE* radioSocketFile);
 	void processServerResponse();
 
 private:
-	FILE* socketFile;
+	FILE* radioSocketFile;
 	size_t dataChunkSize;
 	bool requestMetadata;
 
@@ -20,6 +20,8 @@ private:
 	const size_t METADATA_BLOCKSIZE_FACTOR = 16;
 	const size_t DEFAULT_DATA_CHUNK_SIZE = 8192;
 
+	void processAudio(char* audioBuffer, size_t dataSize);
+	void processMetadata(char* metadataBuffer, size_t dataSize);
 	bool readStatusLine();
 	void readHeaders();
 	void readData();
