@@ -11,6 +11,11 @@ public:
 	InputData(int argc, const char** argv);
 	~InputData();
 
+	// Mowi czy korzystamy z funkcjonalnosci czesci B.
+	bool isBroadcasting() {
+		return broadcasting;
+	}
+
 	const char* getRadioHost() {
 		return radioHost;
 	}
@@ -44,6 +49,7 @@ public:
 	}
 
 private:
+	bool broadcasting;
 	const char* radioHost;
 	const char* radioResourcePath;
 	const char* radioPort;

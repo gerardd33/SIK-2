@@ -9,11 +9,11 @@
 
 class Player {
 public:
-	Player(int argc, const char** argv) : radioInfo(argc, argv) {}
+	Player(int argc, const char** argv) : inputData(argc, argv) {}
 	void run();
 
 private:
-	InputData radioInfo;
+	InputData inputData;
 };
 
 #endif //PLAYER_HPP_

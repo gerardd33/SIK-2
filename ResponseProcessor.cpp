@@ -68,7 +68,7 @@ void ResponseProcessor::readAudioBlock(char* audioBuffer) {
 }
 
 void ResponseProcessor::readMetadataBlock(char* metadataSizeBuffer, char* metadataBuffer) {
-	if (!this->requestMetadata) {
+	if (!this->inputData.isRequestMetadata()) {
 		return;
 	}
 
@@ -127,10 +127,9 @@ void ResponseProcessor::checkIfMetadataInterval(char* line) {
 	}
 }
 
-ResponseProcessor::ResponseProcessor(InputData& radioInfo, FILE* radioSocketFile, FILE* broadcastSocketFile) :
-	radioSocketFile(radioSocketFile), broadcastSocketFile(broadcastSocketFile),
-	requestMetadata(radioInfo.isRequestMetadata()) {
-	if (this->requestMetadata) {
+ResponseProcessor::ResponseProcessor(InputData& inputData, FILE* radioSocketFile, FILE* broadcastSocketFile) :
+	inputData(inputData), broadcastSocketFile(broadcastSocketFile) {
+	if (this->inputData.isRequestMetadata()) {
 		this->dataChunkSize = -1;
 	} else {
 		this->dataChunkSize = DEFAULT_DATA_CHUNK_SIZE;
@@ -138,20 +137,20 @@ ResponseProcessor::ResponseProcessor(InputData& radioInfo, FILE* radioSocketFile
 }
 
 void ResponseProcessor::processAudio(char* audioBuffer, size_t dataSize) {
-	// TODO Redirect to broadcaster
-	// TODO check if only part A
-	for (size_t byte = 0; byte < dataSize; ++byte) {
-		printf("%c", audioBuffer[byte]);
+	if (this->inputData.isBroadcasting()) {
+		// TODO Redirect to broadcaster
+	} else {
+		printString(stdout, audioBuffer, dataSize);
 	}
 }
 
 void ResponseProcessor::processMetadata(char* metadataBuffer, size_t dataSize) {
-	// TODO Redirect to broadcaster
-	// TODO check if only part A
-	for (size_t byte = 0; byte < dataSize; ++byte) {
-		fprintf(stderr, "%c", metadataBuffer[byte]);
+	if (this->inputData.isBroadcasting()) {
+		// TODO Redirect to broadcaster
+	} else {
+		printString(stderr, metadataBuffer, dataSize);
+		fprintf(stderr, "\n");
 	}
-	fprintf(stderr, "\n");
 }
 
 void ResponseProcessor::processServerResponse() {

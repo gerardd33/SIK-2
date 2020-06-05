@@ -8,14 +8,14 @@
 
 class ResponseProcessor {
 public:
-	ResponseProcessor(InputData& radioInfo, FILE* radioSocketFile, FILE* broadcastSocketFile);
+	ResponseProcessor(InputData& inputData, FILE* radioSocketFile, FILE* broadcastSocketFile);
 	void processServerResponse();
 
 private:
+	InputData& inputData;
 	FILE* radioSocketFile;
 	FILE* broadcastSocketFile;
 	size_t dataChunkSize;
-	bool requestMetadata;
 
 	const size_t METADATA_MAX_LENGTH = 4080;
 	const size_t METADATA_BLOCKSIZE_FACTOR = 16;

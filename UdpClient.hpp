@@ -7,7 +7,7 @@
 
 class UdpClient {
 public:
-	explicit UdpClient(InputData& radioInfo);
+	explicit UdpClient(InputData& inputData);
 	~UdpClient();
 
 	FILE* getSocketFile() {
@@ -15,7 +15,7 @@ public:
 	}
 
 private:
-	InputData& radioInfo;
+	InputData& inputData;
 	FILE* socketFile;
 	int socketDescriptor;
 
