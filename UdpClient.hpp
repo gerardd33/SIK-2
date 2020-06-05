@@ -15,15 +15,12 @@ public:
 	}
 
 private:
-	RadioInfo& radioInfo;
 	FILE* socketFile;
 	int socketDescriptor;
 
 	void establishUdpConnection();
-	void bindSocket();
+	struct addrinfo* getAddressInfo();
 	void setTimeout();
-
-	const unsigned int DEFAULT_PORT_NUMBER = 10001;
 };
 
 #endif //UDPCLIENT_HPP_

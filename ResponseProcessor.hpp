@@ -8,12 +8,11 @@
 
 class ResponseProcessor {
 public:
-	ResponseProcessor(RadioInfo& radioInfo, FILE* radioSocketFile, FILE* broadcastSocketFile);
+	ResponseProcessor(RadioInfo& radioInfo, FILE* radioSocketFile);
 	void processServerResponse();
 
 private:
 	FILE* radioSocketFile;
-	FILE* broadcastSocketFile;
 	size_t dataChunkSize;
 	bool requestMetadata;
 
@@ -23,7 +22,7 @@ private:
 
 	void processAudio(char* audioBuffer, size_t dataSize);
 	void processMetadata(char* metadataBuffer, size_t dataSize);
-	void readStatusLine();
+	bool readStatusLine();
 	void readHeaders();
 	void readData();
 	void checkIfMetadataInterval(char* line);

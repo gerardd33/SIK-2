@@ -1,6 +1,6 @@
 #include "ResponseProcessor.hpp"
 
-void ResponseProcessor::readStatusLine() {
+bool ResponseProcessor::readStatusLine() {
 	char* protocoleVersion = nullptr;
 	char* statusMessage = nullptr;
 	int statusCode;
@@ -12,10 +12,11 @@ void ResponseProcessor::readStatusLine() {
 	if (statusCode != 200 || strcmp(statusMessage, "OK") != 0) {
 		fprintf(stderr, "%d %s\n", statusCode, statusMessage);
 		free(statusMessage);
-		ErrorHandler::fatal("Requesting from server");
+		return false;
 	}
 
 	free(statusMessage);
+	return true;
 }
 
 void ResponseProcessor::readHeaders() {
@@ -127,8 +128,7 @@ void ResponseProcessor::checkIfMetadataInterval(char* line) {
 	}
 }
 
-ResponseProcessor::ResponseProcessor(RadioInfo& radioInfo, FILE* radioSocketFile, FILE* broadcastSocketFile) :
-	radioSocketFile(radioSocketFile), broadcastSocketFile(broadcastSocketFile),
+ResponseProcessor::ResponseProcessor(RadioInfo& radioInfo, FILE* radioSocketFile) : radioSocketFile(radioSocketFile),
 	requestMetadata(radioInfo.isRequestMetadata()) {
 	if (this->requestMetadata) {
 		this->dataChunkSize = -1;
@@ -138,22 +138,17 @@ ResponseProcessor::ResponseProcessor(RadioInfo& radioInfo, FILE* radioSocketFile
 }
 
 void ResponseProcessor::processAudio(char* audioBuffer, size_t dataSize) {
-	// TODO Redirect to broadcaster
-	for (size_t byte = 0; byte < dataSize; ++byte) {
-		printf("%c", audioBuffer[byte]);
-	}
+
 }
 
 void ResponseProcessor::processMetadata(char* metadataBuffer, size_t dataSize) {
-	// TODO Redirect to broadcaster
-	for (size_t byte = 0; byte < dataSize; ++byte) {
-		fprintf(stderr, "%c", metadataBuffer[byte]);
-	}
-	fprintf(stderr, "\n");
+
 }
 
 void ResponseProcessor::processServerResponse() {
-	readStatusLine();
+	if (!readStatusLine()) {
+		return;
+	}
 	readHeaders();
 	readData();
 }
