@@ -7,7 +7,7 @@
 
 class UdpClient {
 public:
-	UdpClient();
+	explicit UdpClient(RadioInfo& radioInfo);
 	~UdpClient();
 
 	FILE* getSocketFile() {
@@ -18,7 +18,7 @@ private:
 	FILE* socketFile;
 	int socketDescriptor;
 
-	int establishUdpConnection();
+	void establishUdpConnection();
 	struct addrinfo* getAddressInfo();
 	void setTimeout();
 };

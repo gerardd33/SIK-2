@@ -7,7 +7,7 @@ struct addrinfo* UdpClient::getAddressInfo() {
 void UdpClient::setTimeout() {
 	/*
 	struct timeval timeout;
-	timeout.tv_sec = this->radioInfo.getTimeout();
+	timeout.tv_sec = this->radioInfo.getRadioTimeout();
 	timeout.tv_usec = 0;
 
 	if (setsockopt(this->socketDescriptor, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
@@ -20,8 +20,8 @@ void UdpClient::setTimeout() {
 	 */
 }
 
-int UdpClient::establishUdpConnection() {
-	return 0;
+void UdpClient::establishUdpConnection() {
+
 }
 
 UdpClient::~UdpClient() {
@@ -29,8 +29,8 @@ UdpClient::~UdpClient() {
 	close(this->socketDescriptor);
 }
 
-UdpClient::UdpClient() {
-	this->socketDescriptor = establishUdpConnection();
+UdpClient::UdpClient(RadioInfo& radioInfo) {
+	establishUdpConnection();
 	setTimeout();
 	this->socketFile = fdopen(this->socketDescriptor, "r+");
 }

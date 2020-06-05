@@ -1,15 +1,15 @@
 #include "TcpClient.hpp"
 
 TcpClient::TcpClient(RadioInfo& radioInfo) : radioInfo(radioInfo) {
-	this->socketDescriptor = establishTcpConnection();
-	setTimeout();
+	establishTcpConnection();
+	setRadioTimeout();
 	this->socketFile = fdopen(this->socketDescriptor, "r+");
 }
 
-int TcpClient::establishTcpConnection() {
+void TcpClient::establishTcpConnection() {
 	struct addrinfo* addressInfo = getAddressInfo();
 
-	int socketDescriptor = socket(addressInfo->ai_family, addressInfo->ai_socktype, addressInfo->ai_protocol);
+	this->socketDescriptor = socket(addressInfo->ai_family, addressInfo->ai_socktype, addressInfo->ai_protocol);
 	if (socketDescriptor < 0) {
 		ErrorHandler::syserr("socket");
 	}
@@ -19,7 +19,6 @@ int TcpClient::establishTcpConnection() {
 	}
 
 	freeaddrinfo(addressInfo);
-	return socketDescriptor;
 }
 
 struct addrinfo* TcpClient::getAddressInfo() {
@@ -44,9 +43,9 @@ TcpClient::~TcpClient() {
 	close(this->socketDescriptor);
 }
 
-void TcpClient::setTimeout() {
+void TcpClient::setRadioTimeout() {
 	struct timeval timeout;
-	timeout.tv_sec = this->radioInfo.getTimeout();
+	timeout.tv_sec = this->radioInfo.getRadioTimeout();
 	timeout.tv_usec = 0;
 
 	if (setsockopt(this->socketDescriptor, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {

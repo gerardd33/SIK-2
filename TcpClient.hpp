@@ -19,9 +19,9 @@ private:
 	FILE* socketFile;
 	int socketDescriptor;
 
-	int establishTcpConnection();
+	void establishTcpConnection();
 	struct addrinfo* getAddressInfo();
-	void setTimeout();
+	void setRadioTimeout();
 };
 
 #endif //TCPCLIENT_HPP_

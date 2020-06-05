@@ -3,7 +3,7 @@
 
 RadioInfo::RadioInfo(int argc, const char** argv) {
 	// Default values of optional arguments.
-	this->timeout = DEFAULT_TIMEOUT;
+	this->radioTimeout = DEFAULT_RADIO_TIMEOUT;
 	this->requestMetadata = false;
 
 	this->radioHost = nullptr;
@@ -42,9 +42,9 @@ void RadioInfo::assignArgument(char argumentFlag, const char* argumentValue) {
 			}
 			break;
 
-		case 't': // Timeout
-			this->timeout = static_cast<int>(strtol(argumentValue, nullptr, 10));
-			if (errno != 0 || this->timeout <= 0) { // Invalid number.
+		case 't': // Radio timeout
+			this->radioTimeout = static_cast<int>(strtol(argumentValue, nullptr, 10));
+			if (errno != 0 || this->radioTimeout <= 0) { // Invalid number.
 				ErrorHandler::usage();
 			}
 			break;

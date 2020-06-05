@@ -23,8 +23,8 @@ public:
 		return radioPort;
 	}
 
-	unsigned int getTimeout() {
-		return timeout;
+	unsigned int getRadioTimeout() {
+		return radioTimeout;
 	}
 
 	bool isRequestMetadata() {
@@ -35,10 +35,10 @@ private:
 	const char* radioHost;
 	const char* radioResourcePath;
 	const char* radioPort;
-	unsigned int timeout;
+	unsigned int radioTimeout;
 	bool requestMetadata;
 
-	static const unsigned int DEFAULT_TIMEOUT = 5;
+	static const unsigned int DEFAULT_RADIO_TIMEOUT = 5;
 
 	void parseArguments(int argc, const char** argv);
 	void assignArgument(char argumentFlag, const char* argumentValue);
