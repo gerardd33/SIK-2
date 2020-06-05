@@ -9,10 +9,13 @@ long long Broadcaster::getLastContactTime(std::pair<sockaddr_in, long long> mapE
 }
 
 void Broadcaster::handleClients() {
+	while (this->interrupted) {
 
+	}
 }
 
-Broadcaster::Broadcaster(InputData& inputData) : inputData(inputData), broadcastSocketFile(nullptr) {
+Broadcaster::Broadcaster(InputData& inputData) : inputData(inputData), broadcastSocketFile(nullptr),
+	interrupted(false) {
 	UdpClient udpClient(inputData);
 	this->broadcastSocketFile = udpClient.getSocketFile();
 

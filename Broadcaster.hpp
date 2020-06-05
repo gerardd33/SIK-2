@@ -8,7 +8,6 @@
 
 using LastContactMap = std::map<sockaddr_in, long long>;
 
-
 class Broadcaster {
 public:
 	explicit Broadcaster(InputData& inputData);
@@ -16,9 +15,14 @@ public:
 	void broadcastAudio(const char* audioBuffer, size_t dataSize);
 	void broadcastMetadata(const char* metadataBuffer, size_t dataSize);
 
+	void interrupt() {
+		interrupted = true;
+	}
+
 private:
 	InputData& inputData;
 	FILE* broadcastSocketFile;
+	bool interrupted;
 
 	LastContactMap lastContactMap;
 	sockaddr_in getClientAddress(std::pair<sockaddr_in, long long> mapEntry);
