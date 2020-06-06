@@ -95,7 +95,7 @@ std::vector<sockaddr_in> Broadcaster::getActiveClients() {
 		long long lastContactTime = getLastContactTime(entry);
 
 		long long currentMiliseconds = getCurrentMiliseconds();
-		if (currentMiliseconds - lastContactTime < inputData.getBroadcastTimeout())  {
+		if (currentMiliseconds - lastContactTime > 1000 * inputData.getBroadcastTimeout())  {
 			clientsToRemove.push_back(clientAddress);
 		} else {
 			activeClients.push_back(clientAddress);
