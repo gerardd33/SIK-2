@@ -40,7 +40,7 @@ private:
 	std::mutex waitForRadioMutex;
 
 	void handleClients();
-	void sendMessage(uint16_t messageType, sockaddr_in clientAddress, char* messageBuffer,
+	void sendMessage(uint16_t messageType, sockaddr_in& clientAddress, char* messageBuffer,
 					const char* messageContent, size_t contentSize);
 
 	static void copyContentToBuffer(char* messageBuffer, const char* messageContent, size_t dataSize);

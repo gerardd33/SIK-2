@@ -37,15 +37,16 @@ bool ResponseProcessor::readStatusLine() {
 
 void ResponseProcessor::readHeaders() {
 	char* line = nullptr;
-	char* parsedHeader = nullptr;
 	size_t bufferSize = 0;
 
 	while (!Environment::interrupted) {
 		if (getline(&line, &bufferSize, this->tcpClient.getSocketFile()) == -1) {
+			free(line);
 			ErrorHandler::syserr("getline");
 		}
 
 		if (strcmp(line, CRLF) == 0) {
+			free(line);
 			break;
 		}
 
@@ -58,8 +59,6 @@ void ResponseProcessor::readHeaders() {
 	}
 
 	free(line);
-	free(parsedHeader);
-
 	// Did not find metadata interval information in headers.
 	if (this->dataChunkSize == -1) {
 		ErrorHandler::fatal("Processing server response");

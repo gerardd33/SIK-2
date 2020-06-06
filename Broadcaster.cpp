@@ -48,7 +48,7 @@ void Broadcaster::handleClients() {
 	}
 }
 
-void Broadcaster::sendMessage(uint16_t messageType, sockaddr_in clientAddress, char* messageBuffer,
+void Broadcaster::sendMessage(uint16_t messageType, sockaddr_in& clientAddress, char* messageBuffer,
 	const char* messageContent, size_t contentSize) {
 	auto clientAddressLength = static_cast<socklen_t>(sizeof(clientAddress));
 

@@ -12,7 +12,6 @@ public:
 	static void usage() __attribute__((noreturn));
 	static void fatal(const char* message) __attribute__((noreturn));
 	static void syserr(const char* message) __attribute__((noreturn));
-	static void noexit(const char* message);
 	static void checkInterrupted();
 
 	// TODO usun wywolania

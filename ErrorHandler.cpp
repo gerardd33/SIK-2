@@ -30,12 +30,6 @@ void ErrorHandler::syserr(const char* message) {
 	exit(1);
 }
 
-void ErrorHandler::noexit(const char* message) {
-	checkInterrupted();
-
-	fprintf(stderr, "ERROR: %s\n", message);
-}
-
 // TODO usun
 void ErrorHandler::debug(const char* message, int value) {
 	fprintf(stderr, "DEBUG: %s: %d\n", message, value);

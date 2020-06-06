@@ -1,5 +1,15 @@
 #include "UdpClient.hpp"
 
+UdpClient::~UdpClient() {
+	close(this->socketDescriptor);
+}
+
+UdpClient::UdpClient(InputData& inputData) : inputData(inputData) {
+	establishUdpConnection();
+	setTimeout();
+	setMulticast();
+}
+
 void UdpClient::bindSocket() {
 	this->serverAddress.sin_family = AF_INET;
 	this->serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -50,14 +60,4 @@ void UdpClient::establishUdpConnection() {
 	}
 
 	bindSocket();
-}
-
-UdpClient::~UdpClient() {
-	close(this->socketDescriptor);
-}
-
-UdpClient::UdpClient(InputData& inputData) : inputData(inputData) {
-	establishUdpConnection();
-	setTimeout();
-	setMulticast();
 }
