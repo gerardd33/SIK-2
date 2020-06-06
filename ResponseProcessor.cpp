@@ -76,14 +76,9 @@ void ResponseProcessor::readAudioBlock(char* audioBuffer) {
 }
 
 void ResponseProcessor::readMetadataBlock(char* metadataSizeBuffer, char* metadataBuffer) {
-	ErrorHandler::debug("kurwa");
-
 	if (!this->inputData.isRequestMetadata()) {
-		ErrorHandler::debug("tam");
 		return;
 	}
-
-	ErrorHandler::debug("tutaj");
 
 	metadataSizeBuffer[0] = 0;
 	size_t bytesRead = fread(metadataSizeBuffer, 1, 1, radioSocketFile);
@@ -110,22 +105,16 @@ void ResponseProcessor::readData() {
 	char metadataSizeBuffer[1];
 	char metadataBuffer[METADATA_MAX_LENGTH];
 
-	ErrorHandler::debug("1");
-
 	while (true) {
-		ErrorHandler::debug("2");
 		readAudioBlock(audioBuffer);
-		ErrorHandler::debug("3");
 		if (checkIfFinished()) {
 			break;
 		}
-		ErrorHandler::debug("4");
 
 		readMetadataBlock(metadataSizeBuffer, metadataBuffer);
 		if (checkIfFinished()) {
 			break;
 		}
-		ErrorHandler::debug("5");
 	}
 
 	// TODO zadbaj zeby to sie wykonalo albo daj jakos do destruktora
