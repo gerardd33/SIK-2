@@ -9,12 +9,12 @@
 
 class ResponseProcessor {
 public:
-	ResponseProcessor(InputData& inputData, FILE* radioSocketFile, Broadcaster& broadcaster);
+	ResponseProcessor(InputData& inputData, FILE* radioSocketFile, Broadcaster* broadcaster);
 	void processServerResponse();
 
 private:
 	InputData& inputData;
-	Broadcaster& broadcaster;
+	Broadcaster* broadcaster;
 	FILE* radioSocketFile;
 	size_t dataChunkSize;
 

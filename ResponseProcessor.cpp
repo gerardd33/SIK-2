@@ -144,14 +144,14 @@ void ResponseProcessor::checkIfRadioName(char* line) {
 
 	if (sscanfResult > 0) {
 		fprintf(stderr, "RADIONAME GOT: %s:\n", readValue);
-		this->broadcaster.setRadioName(readValue);
+		this->broadcaster->setRadioName(readValue);
 	}
 
 	// TODO czy nie wywala jesli nullptr?
 	free(readValue);
 }
 
-ResponseProcessor::ResponseProcessor(InputData& inputData, FILE* radioSocketFile, Broadcaster& broadcaster) :
+ResponseProcessor::ResponseProcessor(InputData& inputData, FILE* radioSocketFile, Broadcaster* broadcaster) :
 	inputData(inputData), radioSocketFile(radioSocketFile), broadcaster(broadcaster) {
 	if (this->inputData.isRequestMetadata()) {
 		this->dataChunkSize = -1;
@@ -162,7 +162,7 @@ ResponseProcessor::ResponseProcessor(InputData& inputData, FILE* radioSocketFile
 
 void ResponseProcessor::processAudio(char* audioBuffer, size_t dataSize) {
 	if (this->inputData.isBroadcasting()) {
-		this->broadcaster.broadcastAudio(audioBuffer, dataSize);
+		this->broadcaster->broadcastAudio(audioBuffer, dataSize);
 	} else {
 		printString(stdout, audioBuffer, dataSize);
 	}
@@ -170,7 +170,7 @@ void ResponseProcessor::processAudio(char* audioBuffer, size_t dataSize) {
 
 void ResponseProcessor::processMetadata(char* metadataBuffer, size_t dataSize) {
 	if (this->inputData.isBroadcasting()) {
-		this->broadcaster.broadcastMetadata(metadataBuffer, dataSize);
+		this->broadcaster->broadcastMetadata(metadataBuffer, dataSize);
 	} else {
 		printString(stderr, metadataBuffer, dataSize);
 		fprintf(stderr, "\n");

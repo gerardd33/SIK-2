@@ -15,6 +15,7 @@ class Broadcaster {
 public:
 	explicit Broadcaster(InputData& inputData);
 	~Broadcaster();
+
 	void broadcastAudio(const char* audioBuffer, size_t dataSize);
 	void broadcastMetadata(const char* metadataBuffer, size_t dataSize);
 

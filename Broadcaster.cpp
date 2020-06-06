@@ -95,7 +95,7 @@ std::vector<sockaddr_in> Broadcaster::getActiveClients() {
 		long long lastContactTime = getLastContactTime(entry);
 
 		long long currentMiliseconds = getCurrentMiliseconds();
-		if (currentMiliseconds - lastContactTime > inputData.getBroadcastTimeout())  {
+		if (currentMiliseconds - lastContactTime < inputData.getBroadcastTimeout())  {
 			clientsToRemove.push_back(clientAddress);
 		} else {
 			activeClients.push_back(clientAddress);
@@ -115,6 +115,8 @@ void Broadcaster::sendMessage(uint16_t messageType, const sockaddr_in clientAddr
 	size_t messageSize) {
 	auto clientAddressLength = static_cast<socklen_t>(sizeof(clientAddress));
 
+	ErrorHandler::debug("Sending message to client", messageType);
+
 	*((uint16_t*) messageBuffer) = htons(messageType);
 	*((uint16_t*) (messageBuffer + HEADER_FIELD_SIZE)) = htons(messageSize);
 	strcpy(messageBuffer + 2 * HEADER_FIELD_SIZE, messageContent);
@@ -129,8 +131,8 @@ void Broadcaster::sendMessage(uint16_t messageType, const sockaddr_in clientAddr
 }
 
 void Broadcaster::broadcastAudio(const char* audioBuffer, size_t dataSize) {
-	ErrorHandler::debug("broadcasting audio");
 	std::vector<sockaddr_in> activeClients = getActiveClients();
+	ErrorHandler::debug("Active client number", activeClients.size());
 
 	char messageBuffer[MESSAGE_BUFFER_SIZE];
 	for (auto& clientAddress : activeClients) {
@@ -140,7 +142,6 @@ void Broadcaster::broadcastAudio(const char* audioBuffer, size_t dataSize) {
 }
 
 void Broadcaster::broadcastMetadata(const char* metadataBuffer, size_t dataSize) {
-	ErrorHandler::debug("broadcasting metadata");
 	std::vector<sockaddr_in> activeClients = getActiveClients();
 
 	char messageBuffer[MESSAGE_BUFFER_SIZE];
