@@ -12,6 +12,9 @@ public:
 	static void fatal(const char* message);
 	static void syserr(const char* message);
 	static void noexit(const char* message);
+
+	// TODO usun wywolania
+	static void debug(const char* message);
 };
 
 #endif //ERRORHANDLER_HPP_

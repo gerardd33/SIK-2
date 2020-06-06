@@ -37,20 +37,6 @@ void Broadcaster::updateLastContact(sockaddr_in clientAddress) {
 	this->lastContactMapMutex.unlock();
 }
 
-void Broadcaster::sendGreeting(char* messageBuffer, struct sockaddr_in clientAddress, socklen_t clientAddressLength) {
-	*((uint16_t*) messageBuffer) = htons(IAM);
-	*((uint16_t*) (messageBuffer + HEADER_FIELD_SIZE)) = htons(strlen(this->radioName));
-	strcpy(messageBuffer + 2 * HEADER_FIELD_SIZE, this->radioName);
-
-	size_t messageLength = strlen(this->radioName) + 2 * HEADER_FIELD_SIZE;
-	ssize_t sentLength = sendto(this->udpConnection.getSocketDescriptor(), messageBuffer,
-								messageLength, 0, (struct sockaddr*) &clientAddress, clientAddressLength);
-
-	if (sentLength < 0) {
-		ErrorHandler::syserr("sendto");
-	}
-}
-
 void Broadcaster::handleClients() {
 	struct sockaddr_in clientAddress{};
 	char messageBuffer[MESSAGE_BUFFER_SIZE];
@@ -71,7 +57,8 @@ void Broadcaster::handleClients() {
 
 		uint16_t messageType = ntohs(*((uint16_t*) messageBuffer));
 		if (messageType == DISCOVER) {
-			sendGreeting(messageBuffer, clientAddress, clientAddressLength);
+			memset(messageBuffer, 0, sizeof(char) * MESSAGE_BUFFER_SIZE);
+			sendMessage(IAM, clientAddress, messageBuffer, this->radioName, strlen(this->radioName));
 			updateLastContact(clientAddress);
 		} else if (messageType == KEEPALIVE) {
 			updateLastContact(clientAddress);
@@ -94,12 +81,12 @@ Broadcaster::~Broadcaster() {
 	this->clientHandler.join();
 }
 
-std::vector<const sockaddr_in> Broadcaster::getActiveClients() {
+std::vector<sockaddr_in> Broadcaster::getActiveClients() {
 	lastContactMapMutex.lock();
 
-	std::vector<const sockaddr_in> clientsToRemove, activeClients;
+	std::vector<sockaddr_in> clientsToRemove, activeClients;
 	for (lastContactMapEntry& entry : lastContactMap) {
-		const sockaddr_in clientAddress = getClientAddress(entry);
+		sockaddr_in clientAddress = getClientAddress(entry);
 		long long lastContactTime = getLastContactTime(entry);
 
 		long long currentMiliseconds = getCurrentMiliseconds();
@@ -114,29 +101,41 @@ std::vector<const sockaddr_in> Broadcaster::getActiveClients() {
 	return activeClients;
 }
 
-// TODO funkcja do wysylania generic contentu
+void Broadcaster::sendMessage(uint16_t messageType, const sockaddr_in clientAddress, char* messageBuffer, const char* messageContent,
+	size_t messageSize) {
+	auto clientAddressLength = static_cast<socklen_t>(sizeof(clientAddress));
+
+	*((uint16_t*) messageBuffer) = htons(messageType);
+	*((uint16_t*) (messageBuffer + HEADER_FIELD_SIZE)) = htons(messageSize);
+	strcpy(messageBuffer + 2 * HEADER_FIELD_SIZE, messageContent);
+
+	size_t messageLength = 2 * HEADER_FIELD_SIZE + messageSize;
+	ssize_t sentLength = sendto(this->udpConnection.getSocketDescriptor(), messageBuffer,
+								messageLength, 0, (struct sockaddr*) &clientAddress, clientAddressLength);
+
+	if (sentLength < 0) {
+		ErrorHandler::syserr("sendto");
+	}
+}
 
 void Broadcaster::broadcastAudio(const char* audioBuffer, size_t dataSize) {
-	std::vector<const sockaddr_in> activeClients = getActiveClients();
+	ErrorHandler::debug("broadcasting audio");
+	std::vector<sockaddr_in> activeClients = getActiveClients();
 
+	char messageBuffer[MESSAGE_BUFFER_SIZE];
 	for (auto& clientAddress : activeClients) {
-		auto clientAddressLength = static_cast<socklen_t>(sizeof(clientAddress));
-		char messageBuffer[MESSAGE_BUFFER_SIZE];
-
-		*((uint16_t*) messageBuffer) = htons(AUDIO);
-		*((uint16_t*) (messageBuffer + HEADER_FIELD_SIZE)) = htons(strlen(audioBuffer));
-		strcpy(messageBuffer + 2 * HEADER_FIELD_SIZE, audioBuffer);
-
-		size_t messageLength = strlen(this->radioName) + 2 * HEADER_FIELD_SIZE;
-		ssize_t sentLength = sendto(this->udpConnection.getSocketDescriptor(), messageBuffer,
-									messageLength, 0, (struct sockaddr*) &clientAddress, clientAddressLength);
-
-		if (sentLength < 0) {
-			ErrorHandler::syserr("sendto");
-		}
+		memset(messageBuffer, 0, sizeof(char) * MESSAGE_BUFFER_SIZE);
+		sendMessage(AUDIO, clientAddress, messageBuffer, audioBuffer, dataSize);
 	}
 }
 
 void Broadcaster::broadcastMetadata(const char* metadataBuffer, size_t dataSize) {
-	fprintf(stderr, "broadcasting metadata\n");
+	ErrorHandler::debug("broadcasting metadata");
+	std::vector<sockaddr_in> activeClients = getActiveClients();
+
+	char messageBuffer[MESSAGE_BUFFER_SIZE];
+	for (auto& clientAddress : activeClients) {
+		memset(messageBuffer, 0, sizeof(char) * MESSAGE_BUFFER_SIZE);
+		sendMessage(METADATA, clientAddress, messageBuffer, metadataBuffer, dataSize);
+	}
 }

@@ -63,13 +63,14 @@ private:
 	static sockaddr_in getClientAddress(lastContactMapEntry& mapEntry);
 	static long long getLastContactTime(lastContactMapEntry& mapEntry);
 	void updateLastContact(sockaddr_in clientAddress);
-	std::vector<const sockaddr_in> getActiveClients();
+	std::vector<sockaddr_in> getActiveClients();
 
 	std::thread clientHandler;
 	void handleClients();
 	std::mutex lastContactMapMutex;
 
-	void sendGreeting(char* messageBuffer, struct sockaddr_in clientAddress, socklen_t clientAddressLength);
+	void sendMessage(uint16_t messageType, const sockaddr_in clientAddress, char* messageBuffer,
+		const char* messageContent, size_t messageSize);
 	bool checkReceivedErrorType(ssize_t receivedLength);
 	static long long getCurrentMiliseconds();
 };
