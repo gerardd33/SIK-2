@@ -9,6 +9,8 @@
 #include <vector>
 #include <map>
 
+using lastContactMapEntry = std::pair<const sockaddr_in, long long>;
+
 class Broadcaster {
 public:
 	explicit Broadcaster(InputData& inputData);
@@ -31,7 +33,8 @@ private:
 	static const uint16_t AUDIO = 4;
 	static const uint16_t METADATA = 6;
 	const size_t DEFAULT_DATA_CHUNK_SIZE = 8192;
-	unsigned int HEADER_FIELD_SIZE = 2;
+	const size_t HEADER_FIELD_SIZE = 2;
+	const size_t MESSAGE_BUFFER_SIZE = DEFAULT_DATA_CHUNK_SIZE + 4 * HEADER_FIELD_SIZE;
 	const char* UNKNOWN_RADIO_NAME = "unknown";
 
 	InputData& inputData;
@@ -57,9 +60,10 @@ private:
 	};
 
 	std::map<sockaddr_in, long long, compareClientAddress> lastContactMap;
-	sockaddr_in getClientAddress(std::pair<sockaddr_in, long long> mapEntry);
-	long long getLastContactTime(std::pair<sockaddr_in, long long> mapEntry);
+	static sockaddr_in getClientAddress(lastContactMapEntry& mapEntry);
+	static long long getLastContactTime(lastContactMapEntry& mapEntry);
 	void updateLastContact(sockaddr_in clientAddress);
+	std::vector<const sockaddr_in> getActiveClients();
 
 	std::thread clientHandler;
 	void handleClients();

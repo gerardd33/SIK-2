@@ -1,10 +1,10 @@
 #include "Broadcaster.hpp"
 
-sockaddr_in Broadcaster::getClientAddress(std::pair<sockaddr_in, long long> mapEntry) {
+sockaddr_in Broadcaster::getClientAddress(lastContactMapEntry& mapEntry) {
 	return mapEntry.first;
 }
 
-long long Broadcaster::getLastContactTime(std::pair<sockaddr_in, long long> mapEntry) {
+long long Broadcaster::getLastContactTime(lastContactMapEntry& mapEntry) {
 	return mapEntry.second;
 }
 
@@ -42,9 +42,9 @@ void Broadcaster::sendGreeting(char* messageBuffer, struct sockaddr_in clientAdd
 	*((uint16_t*) (messageBuffer + HEADER_FIELD_SIZE)) = htons(strlen(this->radioName));
 	strcpy(messageBuffer + 2 * HEADER_FIELD_SIZE, this->radioName);
 
-	size_t responseLength = strlen(this->radioName) + 2 * HEADER_FIELD_SIZE;
+	size_t messageLength = strlen(this->radioName) + 2 * HEADER_FIELD_SIZE;
 	ssize_t sentLength = sendto(this->udpConnection.getSocketDescriptor(), messageBuffer,
-		responseLength, 0, (struct sockaddr*) &clientAddress, clientAddressLength);
+								messageLength, 0, (struct sockaddr*) &clientAddress, clientAddressLength);
 
 	if (sentLength < 0) {
 		ErrorHandler::syserr("sendto");
@@ -53,7 +53,7 @@ void Broadcaster::sendGreeting(char* messageBuffer, struct sockaddr_in clientAdd
 
 void Broadcaster::handleClients() {
 	struct sockaddr_in clientAddress{};
-	char messageBuffer[DEFAULT_DATA_CHUNK_SIZE + 3 * HEADER_FIELD_SIZE];
+	char messageBuffer[MESSAGE_BUFFER_SIZE];
 
 	while (!this->interrupted) {
 		auto clientAddressLength = static_cast<socklen_t>(sizeof(clientAddress));
@@ -94,8 +94,47 @@ Broadcaster::~Broadcaster() {
 	this->clientHandler.join();
 }
 
+std::vector<const sockaddr_in> Broadcaster::getActiveClients() {
+	lastContactMapMutex.lock();
+
+	std::vector<const sockaddr_in> clientsToRemove, activeClients;
+	for (lastContactMapEntry& entry : lastContactMap) {
+		const sockaddr_in clientAddress = getClientAddress(entry);
+		long long lastContactTime = getLastContactTime(entry);
+
+		long long currentMiliseconds = getCurrentMiliseconds();
+		if (currentMiliseconds - lastContactTime > inputData.getBroadcastTimeout())  {
+			clientsToRemove.push_back(clientAddress);
+		} else {
+			activeClients.push_back(clientAddress);
+		}
+	}
+
+	lastContactMapMutex.unlock();
+	return activeClients;
+}
+
+// TODO funkcja do wysylania generic contentu
+
 void Broadcaster::broadcastAudio(const char* audioBuffer, size_t dataSize) {
-	fprintf(stderr, "broadcasting audio\n");
+	std::vector<const sockaddr_in> activeClients = getActiveClients();
+
+	for (auto& clientAddress : activeClients) {
+		auto clientAddressLength = static_cast<socklen_t>(sizeof(clientAddress));
+		char messageBuffer[MESSAGE_BUFFER_SIZE];
+
+		*((uint16_t*) messageBuffer) = htons(AUDIO);
+		*((uint16_t*) (messageBuffer + HEADER_FIELD_SIZE)) = htons(strlen(audioBuffer));
+		strcpy(messageBuffer + 2 * HEADER_FIELD_SIZE, audioBuffer);
+
+		size_t messageLength = strlen(this->radioName) + 2 * HEADER_FIELD_SIZE;
+		ssize_t sentLength = sendto(this->udpConnection.getSocketDescriptor(), messageBuffer,
+									messageLength, 0, (struct sockaddr*) &clientAddress, clientAddressLength);
+
+		if (sentLength < 0) {
+			ErrorHandler::syserr("sendto");
+		}
+	}
 }
 
 void Broadcaster::broadcastMetadata(const char* metadataBuffer, size_t dataSize) {
