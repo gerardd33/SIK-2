@@ -69,8 +69,9 @@ private:
 	std::mutex lastContactMapMutex;
 	std::mutex waitForRadioMutex;
 
+	static void copyContentToBuffer(char* messageBuffer, const char* messageContent, size_t dataSize);
 	void sendMessage(uint16_t messageType, const sockaddr_in clientAddress, char* messageBuffer,
-		const char* messageContent, size_t messageSize);
+		const char* messageContent, size_t contentSize);
 	bool checkReceivedErrorType(ssize_t receivedLength);
 	static long long getCurrentMiliseconds();
 };

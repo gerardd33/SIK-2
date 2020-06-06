@@ -102,6 +102,10 @@ std::vector<sockaddr_in> Broadcaster::getActiveClients() {
 		}
 	}
 
+	for (auto& client : clientsToRemove) {
+		lastContactMap.erase(client);
+	}
+
 	lastContactMapMutex.unlock();
 	return activeClients;
 }
@@ -111,17 +115,23 @@ void Broadcaster::setRadioName(const char* newName) {
 	this->waitForRadioMutex.unlock();
 }
 
+void Broadcaster::copyContentToBuffer(char* messageBuffer, const char* messageContent, size_t dataSize) {
+	for (size_t byte = 0; byte < dataSize; ++byte) {
+		messageBuffer[byte] = messageContent[byte];
+	}
+}
+
 void Broadcaster::sendMessage(uint16_t messageType, const sockaddr_in clientAddress, char* messageBuffer, const char* messageContent,
-	size_t messageSize) {
+	size_t contentSize) {
 	auto clientAddressLength = static_cast<socklen_t>(sizeof(clientAddress));
 
 	ErrorHandler::debug("Sending message to client", messageType);
 
 	*((uint16_t*) messageBuffer) = htons(messageType);
-	*((uint16_t*) (messageBuffer + HEADER_FIELD_SIZE)) = htons(messageSize);
-	strcpy(messageBuffer + 2 * HEADER_FIELD_SIZE, messageContent);
+	*((uint16_t*) (messageBuffer + HEADER_FIELD_SIZE)) = htons(contentSize);
+	copyContentToBuffer(messageBuffer + 2 * HEADER_FIELD_SIZE, messageContent, contentSize);
 
-	size_t messageLength = 2 * HEADER_FIELD_SIZE + messageSize;
+	size_t messageLength = 2 * HEADER_FIELD_SIZE + contentSize;
 	ssize_t sentLength = sendto(this->udpConnection.getSocketDescriptor(), messageBuffer,
 								messageLength, 0, (struct sockaddr*) &clientAddress, clientAddressLength);
 

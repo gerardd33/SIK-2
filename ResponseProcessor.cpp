@@ -35,7 +35,10 @@ void ResponseProcessor::readHeaders() {
 
 		convertHeaderNameToLowercase(line);
 		checkIfMetadataInterval(line);
-		checkIfRadioName(line);
+
+		if (this->inputData.isBroadcasting()) {
+			checkIfRadioName(line);
+		}
 	}
 
 	free(line);
