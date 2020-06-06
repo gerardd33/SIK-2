@@ -1,12 +1,6 @@
 #include "Broadcaster.hpp"
 
-sockaddr_in Broadcaster::getClientAddress(lastContactMapEntry& mapEntry) {
-	return mapEntry.first;
-}
 
-long long Broadcaster::getLastContactTime(lastContactMapEntry& mapEntry) {
-	return mapEntry.second;
-}
 
 bool Broadcaster::checkReceivedErrorType(ssize_t receivedLength) {
 	if (receivedLength < 0) {
@@ -23,18 +17,23 @@ bool Broadcaster::checkReceivedErrorType(ssize_t receivedLength) {
 	return true;
 }
 
-long long Broadcaster::getCurrentMiliseconds() {
-	timeval currentTime{};
-	gettimeofday(&currentTime, nullptr);
-	long long currentMiliseconds = currentTime.tv_sec * 1000 + currentTime.tv_usec / 1000;
-	return currentMiliseconds;
+void Broadcaster::interrupt() {
+	this->interrupted = true;
 }
 
-void Broadcaster::updateLastContact(sockaddr_in clientAddress) {
-	this->lastContactMapMutex.lock();
-	lastContactMap[clientAddress] = getCurrentMiliseconds();
+Broadcaster::Broadcaster(InputData& inputData) : inputData(inputData), interrupted(false),
+	udpConnection(inputData), radioName(UNKNOWN_RADIO_NAME), lastContactStorage(inputData) {
+	this->waitForRadioMutex.lock();
+	this->clientHandler = std::thread(&Broadcaster::handleClients, this);
+}
 
-	this->lastContactMapMutex.unlock();
+Broadcaster::~Broadcaster() {
+	this->clientHandler.join();
+}
+
+void Broadcaster::setRadioName(const char* newName) {
+	this->radioName = strdup(newName);
+	this->waitForRadioMutex.unlock();
 }
 
 void Broadcaster::handleClients() {
@@ -47,8 +46,8 @@ void Broadcaster::handleClients() {
 	while (!this->interrupted) {
 		auto clientAddressLength = static_cast<socklen_t>(sizeof(clientAddress));
 		ssize_t receivedLength = recvfrom(this->udpConnection.getSocketDescriptor(),
-			messageBuffer, sizeof(messageBuffer),0,
-			(struct sockaddr*) &clientAddress, &clientAddressLength);
+										  messageBuffer, sizeof(messageBuffer),0,
+										  (struct sockaddr*) &clientAddress, &clientAddressLength);
 
 		if (receivedLength <= 0) {
 			if (checkReceivedErrorType(receivedLength)) {
@@ -62,54 +61,15 @@ void Broadcaster::handleClients() {
 		if (messageType == DISCOVER) {
 			memset(messageBuffer, 0, sizeof(char) * MESSAGE_BUFFER_SIZE);
 			sendMessage(IAM, clientAddress, messageBuffer, this->radioName, strlen(this->radioName));
-			updateLastContact(clientAddress);
+			this->lastContactStorage.updateLastContact(clientAddress);
 			ErrorHandler::debug("New connection");
 		} else if (messageType == KEEPALIVE) {
-			updateLastContact(clientAddress);
+			this->lastContactStorage.updateLastContact(clientAddress);
 		} else {
 			ErrorHandler::noexit("Invalid message type");
 			continue;
 		}
 	}
-}
-
-Broadcaster::Broadcaster(InputData& inputData) : inputData(inputData), interrupted(false),
-	udpConnection(inputData), radioName(UNKNOWN_RADIO_NAME) {
-	this->waitForRadioMutex.lock();
-	this->clientHandler = std::thread(&Broadcaster::handleClients, this);
-}
-
-Broadcaster::~Broadcaster() {
-	this->clientHandler.join();
-}
-
-std::vector<sockaddr_in> Broadcaster::getActiveClients() {
-	lastContactMapMutex.lock();
-
-	std::vector<sockaddr_in> clientsToRemove, activeClients;
-	for (lastContactMapEntry& entry : lastContactMap) {
-		sockaddr_in clientAddress = getClientAddress(entry);
-		long long lastContactTime = getLastContactTime(entry);
-
-		long long currentMiliseconds = getCurrentMiliseconds();
-		if (currentMiliseconds - lastContactTime > 1000 * inputData.getBroadcastTimeout())  {
-			clientsToRemove.push_back(clientAddress);
-		} else {
-			activeClients.push_back(clientAddress);
-		}
-	}
-
-	for (auto& client : clientsToRemove) {
-		lastContactMap.erase(client);
-	}
-
-	lastContactMapMutex.unlock();
-	return activeClients;
-}
-
-void Broadcaster::setRadioName(const char* newName) {
-	this->radioName = strdup(newName);
-	this->waitForRadioMutex.unlock();
 }
 
 void Broadcaster::copyContentToBuffer(char* messageBuffer, const char* messageContent, size_t dataSize) {
@@ -118,7 +78,7 @@ void Broadcaster::copyContentToBuffer(char* messageBuffer, const char* messageCo
 	}
 }
 
-void Broadcaster::sendMessage(uint16_t messageType, const sockaddr_in clientAddress, char* messageBuffer, const char* messageContent,
+void Broadcaster::sendMessage(uint16_t messageType, sockaddr_in clientAddress, char* messageBuffer, const char* messageContent,
 	size_t contentSize) {
 	auto clientAddressLength = static_cast<socklen_t>(sizeof(clientAddress));
 
@@ -138,7 +98,7 @@ void Broadcaster::sendMessage(uint16_t messageType, const sockaddr_in clientAddr
 }
 
 void Broadcaster::broadcastAudio(const char* audioBuffer, size_t dataSize) {
-	std::vector<sockaddr_in> activeClients = getActiveClients();
+	std::vector<sockaddr_in> activeClients = this->lastContactStorage.getActiveClients();
 	ErrorHandler::debug("Active client number", activeClients.size());
 
 	char messageBuffer[MESSAGE_BUFFER_SIZE];
@@ -149,7 +109,7 @@ void Broadcaster::broadcastAudio(const char* audioBuffer, size_t dataSize) {
 }
 
 void Broadcaster::broadcastMetadata(const char* metadataBuffer, size_t dataSize) {
-	std::vector<sockaddr_in> activeClients = getActiveClients();
+	std::vector<sockaddr_in> activeClients = this->lastContactStorage.getActiveClients();
 
 	char messageBuffer[MESSAGE_BUFFER_SIZE];
 	for (auto& clientAddress : activeClients) {
