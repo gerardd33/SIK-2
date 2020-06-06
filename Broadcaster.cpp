@@ -46,12 +46,10 @@ void Broadcaster::handleClients() {
 
 	while (!this->interrupted) {
 		auto clientAddressLength = static_cast<socklen_t>(sizeof(clientAddress));
-		ErrorHandler::debug("started receiving");
 		ssize_t receivedLength = recvfrom(this->udpConnection.getSocketDescriptor(),
 			messageBuffer, sizeof(messageBuffer),0,
 			(struct sockaddr*) &clientAddress, &clientAddressLength);
 
-		ErrorHandler::debug("received something of length ", receivedLength);
 		if (receivedLength <= 0) {
 			if (checkReceivedErrorType(receivedLength)) {
 				continue;
@@ -61,12 +59,11 @@ void Broadcaster::handleClients() {
 		}
 
 		uint16_t messageType = ntohs(*((uint16_t*) messageBuffer));
-		ErrorHandler::debug("message type", messageType);
 		if (messageType == DISCOVER) {
 			memset(messageBuffer, 0, sizeof(char) * MESSAGE_BUFFER_SIZE);
 			sendMessage(IAM, clientAddress, messageBuffer, this->radioName, strlen(this->radioName));
 			updateLastContact(clientAddress);
-			ErrorHandler::debug("got a client address");
+			ErrorHandler::debug("New connection");
 		} else if (messageType == KEEPALIVE) {
 			updateLastContact(clientAddress);
 		} else {
