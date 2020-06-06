@@ -85,7 +85,7 @@ void ResponseProcessor::checkIfRadioName(char* line) {
 }
 
 void ResponseProcessor::readData() {
-	char* audioBuffer = (char*) malloc(sizeof(char) * this->dataChunkSize);
+	char* audioBuffer = reinterpret_cast<char*>(malloc(sizeof(char) * this->dataChunkSize));
 	char metadataSizeBuffer[1];
 	char metadataBuffer[METADATA_MAX_LENGTH];
 

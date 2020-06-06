@@ -24,8 +24,8 @@ void UdpClient::bindSocket() {
 	this->serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);
 	this->serverAddress.sin_port = htons(inputData.getBroadcastPort());
 
-	if (bind(this->socketDescriptor, (struct sockaddr*) &this->serverAddress,
-			 (socklen_t) sizeof(this->serverAddress)) < 0) {
+	if (bind(this->socketDescriptor, reinterpret_cast<struct sockaddr*>(&this->serverAddress),
+			 static_cast<socklen_t>(sizeof(this->serverAddress))) < 0) {
 		ErrorHandler::syserr("bind");
 	}
 }
