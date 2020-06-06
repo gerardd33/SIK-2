@@ -61,22 +61,29 @@ void ResponseProcessor::printString(FILE* stream, char* string, size_t size) {
 }
 
 void ResponseProcessor::readAudioBlock(char* audioBuffer) {
-	size_t toBeRead = this->dataChunkSize;
+	int toBeRead = this->dataChunkSize;
+
 	while (toBeRead > 0) {
-		size_t bytesRead = fread(audioBuffer, 1, std::min(toBeRead, DEFAULT_DATA_CHUNK_SIZE), radioSocketFile);
-		if (bytesRead < std::min(toBeRead, DEFAULT_DATA_CHUNK_SIZE)) {
+		size_t bytesRead = fread(audioBuffer, 1, std::min(toBeRead,
+			static_cast<int>(DEFAULT_DATA_CHUNK_SIZE)), radioSocketFile);
+		if (bytesRead < std::min(toBeRead, static_cast<int>(DEFAULT_DATA_CHUNK_SIZE))) {
 			ErrorHandler::fatal("Timeout");
 		}
 
-		processAudio(audioBuffer, std::min(toBeRead, DEFAULT_DATA_CHUNK_SIZE));
+		processAudio(audioBuffer, std::min(toBeRead, static_cast<int>(DEFAULT_DATA_CHUNK_SIZE)));
 		toBeRead -= DEFAULT_DATA_CHUNK_SIZE;
 	}
 }
 
 void ResponseProcessor::readMetadataBlock(char* metadataSizeBuffer, char* metadataBuffer) {
+	ErrorHandler::debug("kurwa");
+
 	if (!this->inputData.isRequestMetadata()) {
+		ErrorHandler::debug("tam");
 		return;
 	}
+
+	ErrorHandler::debug("tutaj");
 
 	metadataSizeBuffer[0] = 0;
 	size_t bytesRead = fread(metadataSizeBuffer, 1, 1, radioSocketFile);
@@ -94,6 +101,8 @@ void ResponseProcessor::readMetadataBlock(char* metadataSizeBuffer, char* metada
 	if (bytesRead < metadataSize) {
 		ErrorHandler::fatal("Processing server response");
 	}
+
+	processMetadata(metadataBuffer, metadataSize);
 }
 
 void ResponseProcessor::readData() {
@@ -101,18 +110,25 @@ void ResponseProcessor::readData() {
 	char metadataSizeBuffer[1];
 	char metadataBuffer[METADATA_MAX_LENGTH];
 
+	ErrorHandler::debug("1");
+
 	while (true) {
+		ErrorHandler::debug("2");
 		readAudioBlock(audioBuffer);
+		ErrorHandler::debug("3");
 		if (checkIfFinished()) {
 			break;
 		}
+		ErrorHandler::debug("4");
 
 		readMetadataBlock(metadataSizeBuffer, metadataBuffer);
 		if (checkIfFinished()) {
 			break;
 		}
+		ErrorHandler::debug("5");
 	}
 
+	// TODO zadbaj zeby to sie wykonalo albo daj jakos do destruktora
 	free(audioBuffer);
 }
 

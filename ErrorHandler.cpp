@@ -22,6 +22,7 @@ void ErrorHandler::noexit(const char* message) {
 	fprintf(stderr, "ERROR: %s\n", message);
 }
 
-void ErrorHandler::debug(const char* message) {
-	fprintf(stderr, "DEBUG: %s\n", message);
+// TODO usun
+void ErrorHandler::debug(const char* message, int value) {
+	fprintf(stderr, "DEBUG: %s: %d\n", message, value);
 }

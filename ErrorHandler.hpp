@@ -14,7 +14,7 @@ public:
 	static void noexit(const char* message);
 
 	// TODO usun wywolania
-	static void debug(const char* message);
+	static void debug(const char* message, int value = 0);
 };
 
 #endif //ERRORHANDLER_HPP_
