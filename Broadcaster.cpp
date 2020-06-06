@@ -41,35 +41,32 @@ void Broadcaster::handleClients() {
 			}
 		}
 
-		// zmien nazwe bufora
-
 		// TODO zmien i ladniej
 		uint16_t messageType = ntohs(*((uint16_t*) messageBuffer));
-		switch (messageType) {
-			case DISCOVER:
-				*((uint16_t*) messageBuffer) = htons(IAM);
-				*((uint16_t*) (messageBuffer + 2)) = htons(radioname.size);
-				strcpy(messageBuffer + 4, radioname);
+		if (messageType == DISCOVER) {
+			*((uint16_t*) messageBuffer) = htons(IAM);
+			*((uint16_t*) (messageBuffer + HEADER_FIELD_SIZE)) = htons(strlen(this->radioName));
+			strcpy(messageBuffer + 2 * HEADER_FIELD_SIZE, this->radioName);
 
-				responseLength = radioname.size + 4
-				ssize_t sentLength = sendto(socketDescriptor, messageFromClientBuffer, responseLength, 0,
-											(struct sockaddr*) &clientAddress, clientAddressLength);
+			size_t responseLength = strlen(this->radioName) + 2 * HEADER_FIELD_SIZE;
+			ssize_t sentLength = sendto(socketDescriptor, messageBuffer, responseLength, 0,
+										(struct sockaddr*) &clientAddress, clientAddressLength);
 
-				if (sentLength < 0) {
-					//syserr
-				}
+			if (sentLength < 0) {
+				ErrorHandler::syserr("sendto");
+			}
 
-				timeval tp;
-				timeMapMutex.lock();
-				gettimeofday(&tp, nullptr);
-				uint64_t ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
-				timeMap[client_address] = ms;
-				timeMapMutex.unlock();
+			timeval tp;
+			this->lastContactMapMutex.lock();
+			gettimeofday(&tp, nullptr);
+			uint64_t ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+			lastContactMap[clientAddress] = ms;
+			this->lastContactMapMutex.unlock();
+		} else if (messageType == KEEPALIVE){
 
-			case KEEPALIVE:
-				// ...
-			default:
-				// ...
+		} else {
+			ErrorHandler::noexit("Invalid message type");
+			continue;
 		}
 	}
 }

@@ -61,12 +61,16 @@ void ResponseProcessor::printString(FILE* stream, char* string, size_t size) {
 }
 
 void ResponseProcessor::readAudioBlock(char* audioBuffer) {
-	size_t bytesRead = fread(audioBuffer, 1, this->dataChunkSize, radioSocketFile);
-	if (bytesRead < this->dataChunkSize) {
-		ErrorHandler::fatal("Timeout");
-	}
+	size_t toBeRead = this->dataChunkSize;
+	while (toBeRead > 0) {
+		size_t bytesRead = fread(audioBuffer, 1, std::min(toBeRead, DEFAULT_DATA_CHUNK_SIZE), radioSocketFile);
+		if (bytesRead < std::min(toBeRead, DEFAULT_DATA_CHUNK_SIZE)) {
+			ErrorHandler::fatal("Timeout");
+		}
 
-	processAudio(audioBuffer, this->dataChunkSize);
+		processAudio(audioBuffer, std::min(toBeRead, DEFAULT_DATA_CHUNK_SIZE));
+		toBeRead -= DEFAULT_DATA_CHUNK_SIZE;
+	}
 }
 
 void ResponseProcessor::readMetadataBlock(char* metadataSizeBuffer, char* metadataBuffer) {
@@ -90,8 +94,6 @@ void ResponseProcessor::readMetadataBlock(char* metadataSizeBuffer, char* metada
 	if (bytesRead < metadataSize) {
 		ErrorHandler::fatal("Processing server response");
 	}
-
-	processMetadata(metadataBuffer, metadataSize);
 }
 
 void ResponseProcessor::readData() {

@@ -3,7 +3,9 @@
 
 #include "UdpClient.hpp"
 #include <netinet/in.h>
+#include <sys/time.h>
 #include <thread>
+#include <mutex>
 #include <map>
 
 using LastContactMap = std::map<sockaddr_in, long long>;
@@ -30,6 +32,7 @@ private:
 	static const uint16_t AUDIO = 4;
 	static const uint16_t METADATA = 6;
 	unsigned int MESSAGE_BUFFER_SIZE = 1024;
+	unsigned int HEADER_FIELD_SIZE = 2;
 	const char* UNKNOWN_RADIO_NAME = "unknown";
 
 	InputData& inputData;
@@ -43,6 +46,7 @@ private:
 
 	std::thread clientHandler;
 	void handleClients();
+	std::mutex lastContactMapMutex;
 
 	bool checkReceivedErrorType(ssize_t receivedLength);
 };

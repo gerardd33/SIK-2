@@ -17,3 +17,7 @@ void ErrorHandler::syserr(const char* message) {
 	fprintf(stderr, "(%d; %s)\n", errno, strerror(errno));
 	exit(1);
 }
+
+void ErrorHandler::noexit(const char* message) {
+	fprintf(stderr, "ERROR: %s\n", message);
+}
