@@ -1,14 +1,30 @@
 #include "ResponseProcessor.hpp"
 
+ResponseProcessor::ResponseProcessor(InputData& inputData, TcpClient& tcpClient, Broadcaster* broadcaster) :
+	inputData(inputData), tcpClient(tcpClient), broadcaster(broadcaster) {
+	if (this->inputData.isRequestMetadata()) {
+		this->dataChunkSize = -1;
+	} else {
+		this->dataChunkSize = DEFAULT_DATA_CHUNK_SIZE;
+	}
+}
+
+void ResponseProcessor::processServerResponse() {
+	if (!readStatusLine()) {
+		return;
+	}
+	readHeaders();
+	readData();
+}
+
 bool ResponseProcessor::readStatusLine() {
-	char* protocoleVersion = nullptr;
 	char* statusMessage = nullptr;
 	int statusCode;
 
-	fscanf(this->tcpClient.getSocketFile(), "%m[^ ] %d %m[^\r\n]\n",
-		&protocoleVersion, &statusCode, &statusMessage);
+	if (fscanf(this->tcpClient.getSocketFile(), "%*[^ ] %d %m[^\r\n]\n", &statusCode, &statusMessage) < 0) {
+		ErrorHandler::fatal("Processing server response");
+	}
 
-	free(protocoleVersion);
 	if (statusCode != 200 || strcmp(statusMessage, "OK") != 0) {
 		fprintf(stderr, "%d %s\n", statusCode, statusMessage);
 		free(statusMessage);
@@ -24,12 +40,12 @@ void ResponseProcessor::readHeaders() {
 	char* parsedHeader = nullptr;
 	size_t bufferSize = 0;
 
-	while (true) {
+	while (!Environment::interrupted) {
 		if (getline(&line, &bufferSize, this->tcpClient.getSocketFile()) == -1) {
 			ErrorHandler::syserr("getline");
 		}
 
-		if (strcmp(line, "\r\n") == 0) {
+		if (strcmp(line, CRLF) == 0) {
 			break;
 		}
 
@@ -44,9 +60,52 @@ void ResponseProcessor::readHeaders() {
 	free(line);
 	free(parsedHeader);
 
+	// Did not find metadata interval information in headers.
 	if (this->dataChunkSize == -1) {
 		ErrorHandler::fatal("Processing server response");
 	}
+}
+
+void ResponseProcessor::checkIfMetadataInterval(char* line) {
+	size_t readValue;
+	int readItems = sscanf(line, "icy-metaint%*[: ]%zu%*[\r\n]", &readValue);
+
+	if (readItems > 0) {
+		this->dataChunkSize = readValue;
+	}
+}
+
+void ResponseProcessor::checkIfRadioName(char* line) {
+	char* readValue = nullptr;
+	int readItems = sscanf(line, "icy-name%*[: ]%ms%*[\r\n]", &readValue);
+
+	if (readItems > 0) {
+		this->broadcaster->setRadioName(readValue);
+	}
+
+	free(readValue);
+}
+
+void ResponseProcessor::readData() {
+	char* audioBuffer = (char*) malloc(sizeof(char) * this->dataChunkSize);
+	char metadataSizeBuffer[1];
+	char metadataBuffer[METADATA_MAX_LENGTH];
+
+	while (!Environment::interrupted) {
+		readAudioBlock(audioBuffer);
+		if (checkIfFinished()) {
+			free(audioBuffer);
+			break;
+		}
+
+		readMetadataBlock(metadataSizeBuffer, metadataBuffer);
+		if (checkIfFinished()) {
+			free(audioBuffer);
+			break;
+		}
+	}
+
+	free(audioBuffer);
 }
 
 bool ResponseProcessor::checkIfFinished() {
@@ -55,12 +114,6 @@ bool ResponseProcessor::checkIfFinished() {
 	}
 
 	return feof(this->tcpClient.getSocketFile());
-}
-
-void ResponseProcessor::printString(FILE* stream, char* string, size_t size) {
-	for (size_t byte = 0; byte < size; ++byte) {
-		fprintf(stream, "%c", string[byte]);
-	}
 }
 
 void ResponseProcessor::readAudioBlock(char* audioBuffer) {
@@ -91,9 +144,6 @@ void ResponseProcessor::readMetadataBlock(char* metadataSizeBuffer, char* metada
 
 	auto metadataSize = static_cast<size_t>(metadataSizeBuffer[0]);
 	if (metadataSize == 0) {
-		char tmp[] = "PAPIEZ\n";
-		metadataBuffer = tmp;
-		processMetadata(metadataBuffer, 7);
 		return;
 	}
 
@@ -104,66 +154,6 @@ void ResponseProcessor::readMetadataBlock(char* metadataSizeBuffer, char* metada
 	}
 
 	processMetadata(metadataBuffer, metadataSize);
-}
-
-void ResponseProcessor::readData() {
-	char* audioBuffer = (char*) malloc(sizeof(char) * this->dataChunkSize);
-	char metadataSizeBuffer[1];
-	char metadataBuffer[METADATA_MAX_LENGTH];
-
-	while (!Environment::interrupted) {
-		readAudioBlock(audioBuffer);
-		if (checkIfFinished()) {
-			break;
-		}
-
-		readMetadataBlock(metadataSizeBuffer, metadataBuffer);
-		if (checkIfFinished()) {
-			break;
-		}
-	}
-
-	// TODO zadbaj zeby to sie wykonalo albo daj jakos do destruktora
-	free(audioBuffer);
-}
-
-void ResponseProcessor::convertHeaderNameToLowercase(char* line) {
-	for (size_t index = 0; line[index] != 0 && line[index] != ':'; ++index) {
-		line[index] = static_cast<char>(tolower(line[index]));
-	}
-}
-
-void ResponseProcessor::checkIfMetadataInterval(char* line) {
-	size_t readValue;
-	// TODO sprawdz czy zmienic [\r\n] na %*
-	int sscanfResult = sscanf(line, "icy-metaint%*[: ]%zu[\r\n]", &readValue);
-
-	if (sscanfResult > 0) {
-		this->dataChunkSize = readValue;
-	}
-}
-
-void ResponseProcessor::checkIfRadioName(char* line) {
-	char* readValue = nullptr;
-	// TODO sprawdz czy zmienic [\r\n] na %*
-	int sscanfResult = sscanf(line, "icy-name%*[: ]%ms[\r\n]", &readValue);
-
-	if (sscanfResult > 0) {
-		fprintf(stderr, "RADIONAME GOT: %s:\n", readValue);
-		this->broadcaster->setRadioName(readValue);
-	}
-
-	// TODO czy nie wywala jesli nullptr?
-	free(readValue);
-}
-
-ResponseProcessor::ResponseProcessor(InputData& inputData, TcpClient& tcpClient, Broadcaster* broadcaster) :
-	inputData(inputData), tcpClient(tcpClient), broadcaster(broadcaster) {
-	if (this->inputData.isRequestMetadata()) {
-		this->dataChunkSize = -1;
-	} else {
-		this->dataChunkSize = DEFAULT_DATA_CHUNK_SIZE;
-	}
 }
 
 void ResponseProcessor::processAudio(char* audioBuffer, size_t dataSize) {
@@ -183,10 +173,14 @@ void ResponseProcessor::processMetadata(char* metadataBuffer, size_t dataSize) {
 	}
 }
 
-void ResponseProcessor::processServerResponse() {
-	if (!readStatusLine()) {
-		return;
+void ResponseProcessor::convertHeaderNameToLowercase(char* line) {
+	for (size_t index = 0; line[index] != 0 && line[index] != ':'; ++index) {
+		line[index] = static_cast<char>(tolower(line[index]));
 	}
-	readHeaders();
-	readData();
+}
+
+void ResponseProcessor::printString(FILE* stream, char* string, size_t size) {
+	for (size_t byte = 0; byte < size; ++byte) {
+		fprintf(stream, "%c", string[byte]);
+	}
 }
