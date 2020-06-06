@@ -5,18 +5,19 @@
 #include "ErrorHandler.hpp"
 #include "InputData.hpp"
 #include "Broadcaster.hpp"
+#include "TcpClient.hpp"
 #include <cctype>
 #include <vector>
 
 class ResponseProcessor {
 public:
-	ResponseProcessor(InputData& inputData, FILE* radioSocketFile, Broadcaster* broadcaster);
+	ResponseProcessor(InputData& inputData, TcpClient& tcpClient, Broadcaster* broadcaster);
 	void processServerResponse();
 
 private:
 	InputData& inputData;
+	TcpClient& tcpClient;
 	Broadcaster* broadcaster;
-	FILE* radioSocketFile;
 	size_t dataChunkSize;
 
 	const size_t METADATA_MAX_LENGTH = 4080;

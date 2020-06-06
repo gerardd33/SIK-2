@@ -5,7 +5,7 @@ bool ResponseProcessor::readStatusLine() {
 	char* statusMessage = nullptr;
 	int statusCode;
 
-	fscanf(radioSocketFile, "%m[^ ] %d %m[^\r\n]\n",
+	fscanf(this->tcpClient.getSocketFile(), "%m[^ ] %d %m[^\r\n]\n",
 		&protocoleVersion, &statusCode, &statusMessage);
 
 	free(protocoleVersion);
@@ -25,7 +25,7 @@ void ResponseProcessor::readHeaders() {
 	size_t bufferSize = 0;
 
 	while (true) {
-		if (getline(&line, &bufferSize, radioSocketFile) == -1) {
+		if (getline(&line, &bufferSize, this->tcpClient.getSocketFile()) == -1) {
 			ErrorHandler::syserr("getline");
 		}
 
@@ -50,11 +50,11 @@ void ResponseProcessor::readHeaders() {
 }
 
 bool ResponseProcessor::checkIfFinished() {
-	if (ferror(radioSocketFile)) {
+	if (ferror(this->tcpClient.getSocketFile())) {
 		ErrorHandler::syserr("fread");
 	}
 
-	return feof(radioSocketFile);
+	return feof(this->tcpClient.getSocketFile());
 }
 
 void ResponseProcessor::printString(FILE* stream, char* string, size_t size) {
@@ -68,7 +68,7 @@ void ResponseProcessor::readAudioBlock(char* audioBuffer) {
 
 	while (toBeRead > 0) {
 		size_t bytesRead = fread(audioBuffer, 1, std::min(toBeRead,
-			static_cast<int>(DEFAULT_DATA_CHUNK_SIZE)), radioSocketFile);
+			static_cast<int>(DEFAULT_DATA_CHUNK_SIZE)), this->tcpClient.getSocketFile());
 		if (bytesRead < std::min(toBeRead, static_cast<int>(DEFAULT_DATA_CHUNK_SIZE))) {
 			ErrorHandler::fatal("Timeout");
 		}
@@ -84,7 +84,7 @@ void ResponseProcessor::readMetadataBlock(char* metadataSizeBuffer, char* metada
 	}
 
 	metadataSizeBuffer[0] = 0;
-	size_t bytesRead = fread(metadataSizeBuffer, 1, 1, radioSocketFile);
+	size_t bytesRead = fread(metadataSizeBuffer, 1, 1, this->tcpClient.getSocketFile());
 	if (bytesRead < 1) {
 		ErrorHandler::fatal("Processing server response");
 	}
@@ -98,7 +98,7 @@ void ResponseProcessor::readMetadataBlock(char* metadataSizeBuffer, char* metada
 	}
 
 	metadataSize *= METADATA_BLOCKSIZE_FACTOR;
-	bytesRead = fread(metadataBuffer, 1, metadataSize, radioSocketFile);
+	bytesRead = fread(metadataBuffer, 1, metadataSize, this->tcpClient.getSocketFile());
 	if (bytesRead < metadataSize) {
 		ErrorHandler::fatal("Processing server response");
 	}
@@ -157,8 +157,8 @@ void ResponseProcessor::checkIfRadioName(char* line) {
 	free(readValue);
 }
 
-ResponseProcessor::ResponseProcessor(InputData& inputData, FILE* radioSocketFile, Broadcaster* broadcaster) :
-	inputData(inputData), radioSocketFile(radioSocketFile), broadcaster(broadcaster) {
+ResponseProcessor::ResponseProcessor(InputData& inputData, TcpClient& tcpClient, Broadcaster* broadcaster) :
+	inputData(inputData), tcpClient(tcpClient), broadcaster(broadcaster) {
 	if (this->inputData.isRequestMetadata()) {
 		this->dataChunkSize = -1;
 	} else {

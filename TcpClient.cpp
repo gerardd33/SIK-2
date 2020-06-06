@@ -22,7 +22,7 @@ void TcpClient::establishTcpConnection() {
 }
 
 struct addrinfo* TcpClient::getAddressInfo() {
-	struct addrinfo addressHints;
+	struct addrinfo addressHints{};
 	struct addrinfo* addressResult;
 
 	memset(&addressHints, 0, sizeof(struct addrinfo));

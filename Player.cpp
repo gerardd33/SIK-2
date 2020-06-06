@@ -2,17 +2,16 @@
 
 void Player::run() {
 	TcpClient tcpClient(inputData);
-	FILE* radioSocketFile = tcpClient.getSocketFile();
 
-	RequestSender requestSender(inputData, radioSocketFile);
+	RequestSender requestSender(inputData, tcpClient);
 	requestSender.sendRequest();
 
 	if (this->inputData.isBroadcasting()) { // Part B
 		Broadcaster broadcaster(inputData);
-		ResponseProcessor responseProcessor(inputData, radioSocketFile, &broadcaster);
+		ResponseProcessor responseProcessor(inputData, tcpClient, &broadcaster);
 		responseProcessor.processServerResponse();
 	} else { // Part A only
-		ResponseProcessor responseProcessor(inputData, radioSocketFile, nullptr);
+		ResponseProcessor responseProcessor(inputData, tcpClient, nullptr);
 		responseProcessor.processServerResponse();
 	}
 }
