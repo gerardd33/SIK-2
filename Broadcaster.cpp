@@ -19,6 +19,8 @@ bool Broadcaster::checkReceivedErrorType(ssize_t receivedLength) {
 		interrupt();
 		return false; // return;
 	}
+
+	return true;
 }
 
 void Broadcaster::handleClients() {

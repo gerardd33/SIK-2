@@ -8,8 +8,6 @@
 #include <mutex>
 #include <map>
 
-using LastContactMap = std::map<sockaddr_in, long long>;
-
 class Broadcaster {
 public:
 	explicit Broadcaster(InputData& inputData);
@@ -55,7 +53,7 @@ private:
 		}
 	};
 
-	LastContactMap lastContactMap;
+	std::map<sockaddr_in, long long, compareClientAddress> lastContactMap;
 	sockaddr_in getClientAddress(std::pair<sockaddr_in, long long> mapEntry);
 	long long getLastContactTime(std::pair<sockaddr_in, long long> mapEntry);
 
