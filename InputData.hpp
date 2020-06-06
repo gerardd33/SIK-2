@@ -35,6 +35,10 @@ public:
 		return broadcasting;
 	}
 
+	bool isMulticast() {
+		return multicast;
+	}
+
 	const char* getBroadcastMulticastAddress() {
 		return broadcastMulticastAddress;
 	}
@@ -42,7 +46,6 @@ public:
 	unsigned int getBroadcastPort() {
 		return broadcastPort;
 	}
-
 
 	unsigned int getBroadcastTimeout() {
 		return broadcastTimeout;
@@ -56,6 +59,7 @@ private:
 	unsigned int radioTimeout;
 
 	bool broadcasting;
+	bool multicast;
 	const char* broadcastMulticastAddress;
 	unsigned int broadcastPort;
 	unsigned int broadcastTimeout;

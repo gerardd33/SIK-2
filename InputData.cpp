@@ -2,8 +2,9 @@
 #include "InputData.hpp"
 
 InputData::InputData(int argc, const char** argv) : radioTimeout(DEFAULT_TIMEOUT), requestMetadata(false),
-													radioHost(nullptr), radioResourcePath(nullptr), radioPort(nullptr), broadcasting(false),
-													broadcastPort(0), broadcastMulticastAddress(nullptr), broadcastTimeout(DEFAULT_TIMEOUT) {
+													radioHost(nullptr), radioResourcePath(nullptr), radioPort(nullptr),
+													broadcasting(false), multicast(false), broadcastPort(0),
+													broadcastMulticastAddress(nullptr), broadcastTimeout(DEFAULT_TIMEOUT) {
 	parseArguments(argc, argv);
 
 	// Any of the required arguments is absent.
@@ -61,6 +62,7 @@ void InputData::assignArgument(char argumentFlag, const char* argumentValue) {
 			break;
 
 		case 'B':
+			this->multicast = true;
 			this->broadcastMulticastAddress = strdup(argumentValue);
 			break;
 

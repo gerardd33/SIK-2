@@ -71,7 +71,6 @@ void Broadcaster::handleClients() {
 
 Broadcaster::Broadcaster(InputData& inputData) : inputData(inputData), interrupted(false),
 	udpConnection(inputData), radioName(UNKNOWN_RADIO_NAME) {
-	// TODO multicast
 
 	// TODO jesli bedzie dzialac, przesun do initialisation list
 	this->clientHandler = std::thread(&Broadcaster::handleClients, this);

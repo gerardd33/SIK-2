@@ -12,7 +12,7 @@ void UdpClient::bindSocket() {
 }
 
 void UdpClient::setTimeout() {
-	struct timeval timeout;
+	struct timeval timeout{};
 	timeout.tv_sec = DEFAULT_TIMEOUT;
 	timeout.tv_usec = 0;
 
@@ -22,6 +22,24 @@ void UdpClient::setTimeout() {
 
 	if (setsockopt(this->socketDescriptor, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) < 0) {
 		ErrorHandler::syserr("setsockopt");
+	}
+}
+
+void UdpClient::setMulticast() {
+	if (this->inputData.isMulticast()) {
+		struct ip_mreq requirements{};
+		requirements.imr_interface.s_addr = htonl(INADDR_ANY);
+
+		if (inet_aton(this->inputData.getBroadcastMulticastAddress(),
+			&requirements.imr_multiaddr) == 0) {
+			ErrorHandler::fatal("Invalid multicast address");
+		}
+
+		// TODO usun casta na void* jesli dziala
+		if (setsockopt(this->socketDescriptor, IPPROTO_IP, IP_ADD_MEMBERSHIP,
+			(void*) &requirements, sizeof(ip_mreq)) < 0) {
+			ErrorHandler::syserr("setsockopt");
+		}
 	}
 }
 
@@ -41,4 +59,5 @@ UdpClient::~UdpClient() {
 UdpClient::UdpClient(InputData& inputData) : inputData(inputData) {
 	establishUdpConnection();
 	setTimeout();
+	setMulticast();
 }

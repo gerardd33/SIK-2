@@ -3,6 +3,7 @@
 
 #include "InputData.hpp"
 #include <netdb.h>
+#include <libnet.h>
 #include <unistd.h>
 
 class UdpClient {
@@ -22,6 +23,7 @@ private:
 	void establishUdpConnection();
 	void bindSocket();
 	void setTimeout();
+	void setMulticast();
 
 	const unsigned int DEFAULT_TIMEOUT = 1;
 };
