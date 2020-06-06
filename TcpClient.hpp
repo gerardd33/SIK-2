@@ -19,8 +19,8 @@ private:
 	FILE* socketFile;
 	int socketDescriptor;
 
-	void establishTcpConnection();
-	struct addrinfo* getAddressInfo();
+	void establishConnection();
+	addrinfo* getAddressInfo();
 	void setRadioTimeout();
 };
 

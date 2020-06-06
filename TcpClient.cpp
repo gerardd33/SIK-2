@@ -1,12 +1,17 @@
 #include "TcpClient.hpp"
 
-TcpClient::TcpClient(InputData& inputData) : inputData(inputData) {
-	establishTcpConnection();
+TcpClient::TcpClient(InputData& inputData) : inputData(inputData), socketDescriptor(-1) {
+	establishConnection();
 	setRadioTimeout();
 	this->socketFile = fdopen(this->socketDescriptor, "r+");
 }
 
-void TcpClient::establishTcpConnection() {
+TcpClient::~TcpClient() {
+	fclose(this->socketFile);
+	close(this->socketDescriptor);
+}
+
+void TcpClient::establishConnection() {
 	struct addrinfo* addressInfo = getAddressInfo();
 
 	this->socketDescriptor = socket(addressInfo->ai_family, addressInfo->ai_socktype, addressInfo->ai_protocol);
@@ -14,16 +19,16 @@ void TcpClient::establishTcpConnection() {
 		ErrorHandler::syserr("socket");
 	}
 
-	if (connect(socketDescriptor, addressInfo->ai_addr, addressInfo->ai_addrlen)  < 0) {
+	if (connect(socketDescriptor, addressInfo->ai_addr, addressInfo->ai_addrlen) < 0) {
 		ErrorHandler::syserr("connect");
 	}
 
 	freeaddrinfo(addressInfo);
 }
 
-struct addrinfo* TcpClient::getAddressInfo() {
-	struct addrinfo addressHints{};
-	struct addrinfo* addressResult;
+addrinfo* TcpClient::getAddressInfo() {
+	addrinfo addressHints{};
+	addrinfo* addressResult;
 
 	memset(&addressHints, 0, sizeof(struct addrinfo));
 	addressHints.ai_family = AF_INET;
@@ -38,13 +43,8 @@ struct addrinfo* TcpClient::getAddressInfo() {
 	return addressResult;
 }
 
-TcpClient::~TcpClient() {
-	fclose(this->socketFile);
-	close(this->socketDescriptor);
-}
-
 void TcpClient::setRadioTimeout() {
-	struct timeval timeout;
+	struct timeval timeout{};
 	timeout.tv_sec = this->inputData.getRadioTimeout();
 	timeout.tv_usec = 0;
 
