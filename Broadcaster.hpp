@@ -13,10 +13,10 @@ public:
 	explicit Broadcaster(InputData& inputData);
 	~Broadcaster();
 
+	void setRadioName(const char* newName);
+
 	void broadcastAudio(const char* audioBuffer, size_t dataSize);
 	void broadcastMetadata(const char* metadataBuffer, size_t dataSize);
-
-	void setRadioName(const char* newName);
 
 private:
 	static const uint16_t DISCOVER = 1;
@@ -28,24 +28,23 @@ private:
 	const size_t DEFAULT_DATA_CHUNK_SIZE = 8192;
 	const size_t HEADER_FIELD_SIZE = 2;
 	const size_t MESSAGE_BUFFER_SIZE = DEFAULT_DATA_CHUNK_SIZE + 4 * HEADER_FIELD_SIZE;
-
 	const char* UNKNOWN_RADIO_NAME = "unknown";
 
 	InputData& inputData;
+
 	UdpClient udpConnection;
 	const char* radioName;
-
 	LastContactStorage lastContactStorage;
 
 	std::thread clientHandler;
-	void handleClients();
-
 	std::mutex waitForRadioMutex;
 
-	static void copyContentToBuffer(char* messageBuffer, const char* messageContent, size_t dataSize);
+	void handleClients();
 	void sendMessage(uint16_t messageType, sockaddr_in clientAddress, char* messageBuffer,
-		const char* messageContent, size_t contentSize);
-	bool checkReceivedErrorType(ssize_t receivedLength);
+					const char* messageContent, size_t contentSize);
+
+	static void copyContentToBuffer(char* messageBuffer, const char* messageContent, size_t dataSize);
+	static bool checkReceivedErrorType(ssize_t receivedLength);
 };
 
 #endif //BROADCASTER_HPP_
