@@ -91,6 +91,9 @@ void ResponseProcessor::readMetadataBlock(char* metadataSizeBuffer, char* metada
 
 	auto metadataSize = static_cast<size_t>(metadataSizeBuffer[0]);
 	if (metadataSize == 0) {
+		char tmp[] = "PAPIEZ\n";
+		metadataBuffer = tmp;
+		processMetadata(metadataBuffer, 7);
 		return;
 	}
 
