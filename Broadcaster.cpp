@@ -23,17 +23,43 @@ bool Broadcaster::checkReceivedErrorType(ssize_t receivedLength) {
 	return true;
 }
 
-void Broadcaster::handleClients() {
-	// TODO podziel lepiej na funkcje, przenies niektore odpowiedzialnosci do UDP
+long long Broadcaster::getCurrentMiliseconds() {
+	timeval currentTime{};
+	gettimeofday(&currentTime, nullptr);
+	long long currentMiliseconds = currentTime.tv_sec * 1000 + currentTime.tv_usec / 1000;
+	return currentMiliseconds;
+}
 
-	struct sockaddr_in clientAddress;
+void Broadcaster::updateLastContact(sockaddr_in clientAddress) {
+	this->lastContactMapMutex.lock();
+	lastContactMap[clientAddress] = getCurrentMiliseconds();
+
+	this->lastContactMapMutex.unlock();
+}
+
+void Broadcaster::sendGreeting(char* messageBuffer, struct sockaddr_in clientAddress, socklen_t clientAddressLength) {
+	*((uint16_t*) messageBuffer) = htons(IAM);
+	*((uint16_t*) (messageBuffer + HEADER_FIELD_SIZE)) = htons(strlen(this->radioName));
+	strcpy(messageBuffer + 2 * HEADER_FIELD_SIZE, this->radioName);
+
+	size_t responseLength = strlen(this->radioName) + 2 * HEADER_FIELD_SIZE;
+	ssize_t sentLength = sendto(this->udpConnection.getSocketDescriptor(), messageBuffer,
+		responseLength, 0, (struct sockaddr*) &clientAddress, clientAddressLength);
+
+	if (sentLength < 0) {
+		ErrorHandler::syserr("sendto");
+	}
+}
+
+void Broadcaster::handleClients() {
+	struct sockaddr_in clientAddress{};
 	char messageBuffer[DEFAULT_DATA_CHUNK_SIZE + 3 * HEADER_FIELD_SIZE];
 
-	int socketDescriptor = this->udpConnection.getSocketDescriptor();
 	while (!this->interrupted) {
 		auto clientAddressLength = static_cast<socklen_t>(sizeof(clientAddress));
-		ssize_t receivedLength = recvfrom(socketDescriptor, messageBuffer, sizeof(messageBuffer),
-							  0, (struct sockaddr*) &clientAddress, &clientAddressLength);
+		ssize_t receivedLength = recvfrom(this->udpConnection.getSocketDescriptor(),
+			messageBuffer, sizeof(messageBuffer),0,
+			(struct sockaddr*) &clientAddress, &clientAddressLength);
 
 		if (receivedLength <= 0) {
 			if (checkReceivedErrorType(receivedLength)) {
@@ -43,29 +69,12 @@ void Broadcaster::handleClients() {
 			}
 		}
 
-		// TODO zmien i ladniej
 		uint16_t messageType = ntohs(*((uint16_t*) messageBuffer));
 		if (messageType == DISCOVER) {
-			*((uint16_t*) messageBuffer) = htons(IAM);
-			*((uint16_t*) (messageBuffer + HEADER_FIELD_SIZE)) = htons(strlen(this->radioName));
-			strcpy(messageBuffer + 2 * HEADER_FIELD_SIZE, this->radioName);
-
-			size_t responseLength = strlen(this->radioName) + 2 * HEADER_FIELD_SIZE;
-			ssize_t sentLength = sendto(socketDescriptor, messageBuffer, responseLength, 0,
-										(struct sockaddr*) &clientAddress, clientAddressLength);
-
-			if (sentLength < 0) {
-				ErrorHandler::syserr("sendto");
-			}
-
-			timeval tp;
-			this->lastContactMapMutex.lock();
-			gettimeofday(&tp, nullptr);
-			uint64_t ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
-			lastContactMap[clientAddress] = ms;
-			this->lastContactMapMutex.unlock();
-		} else if (messageType == KEEPALIVE){
-
+			sendGreeting(messageBuffer, clientAddress, clientAddressLength);
+			updateLastContact(clientAddress);
+		} else if (messageType == KEEPALIVE) {
+			updateLastContact(clientAddress);
 		} else {
 			ErrorHandler::noexit("Invalid message type");
 			continue;

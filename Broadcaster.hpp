@@ -6,6 +6,7 @@
 #include <sys/time.h>
 #include <thread>
 #include <mutex>
+#include <vector>
 #include <map>
 
 class Broadcaster {
@@ -38,6 +39,8 @@ private:
 	bool interrupted;
 	const char* radioName;
 
+	// TODO daj mape do osobnej klasy, moze tez tam tego demona utrzymujacego
+
 	static in_addr_t getAddress(const sockaddr_in& addressStruct) {
 		return addressStruct.sin_addr.s_addr;
 	}
@@ -56,12 +59,15 @@ private:
 	std::map<sockaddr_in, long long, compareClientAddress> lastContactMap;
 	sockaddr_in getClientAddress(std::pair<sockaddr_in, long long> mapEntry);
 	long long getLastContactTime(std::pair<sockaddr_in, long long> mapEntry);
+	void updateLastContact(sockaddr_in clientAddress);
 
 	std::thread clientHandler;
 	void handleClients();
 	std::mutex lastContactMapMutex;
 
+	void sendGreeting(char* messageBuffer, struct sockaddr_in clientAddress, socklen_t clientAddressLength);
 	bool checkReceivedErrorType(ssize_t receivedLength);
+	static long long getCurrentMiliseconds();
 };
 
 #endif //BROADCASTER_HPP_
