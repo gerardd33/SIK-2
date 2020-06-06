@@ -1,6 +1,14 @@
 #include "ErrorHandler.hpp"
 
+void ErrorHandler::checkInterrupted() {
+	if (errno == EINTR || Environment::interrupted) {
+		throw InterruptedException();
+	}
+}
+
 void ErrorHandler::usage() {
+	checkInterrupted();
+
 	fprintf(stderr, "Usage: ./radio-proxy -h radio_host -r radio_resource -p radio_port "
 					"[-m yes|no] [-t radio_timeout] [-P broadcast_port "
 					"[-B broadcast_multicast_address] [-T broadcast_timeout]]\n");
@@ -8,18 +16,14 @@ void ErrorHandler::usage() {
 }
 
 void ErrorHandler::fatal(const char* message) {
-	if (errno == EINTR) {
-		return;
-	}
+	checkInterrupted();
 
 	fprintf(stderr, "ERROR: %s\n", message);
 	exit(1);
 }
 
 void ErrorHandler::syserr(const char* message) {
-	if (errno == EINTR) {
-		return;
-	}
+	checkInterrupted();
 
 	fprintf(stderr, "ERROR: %s\n", message);
 	fprintf(stderr, "(%d; %s)\n", errno, strerror(errno));
@@ -27,6 +31,8 @@ void ErrorHandler::syserr(const char* message) {
 }
 
 void ErrorHandler::noexit(const char* message) {
+	checkInterrupted();
+
 	fprintf(stderr, "ERROR: %s\n", message);
 }
 

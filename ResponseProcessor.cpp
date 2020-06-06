@@ -111,7 +111,7 @@ void ResponseProcessor::readData() {
 	char metadataSizeBuffer[1];
 	char metadataBuffer[METADATA_MAX_LENGTH];
 
-	while (true) {
+	while (!Environment::interrupted) {
 		readAudioBlock(audioBuffer);
 		if (checkIfFinished()) {
 			break;

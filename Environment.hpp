@@ -6,7 +6,6 @@
 
 namespace Environment {
 	extern volatile std::sig_atomic_t interrupted;
-
 	void catchSigint();
 }
 

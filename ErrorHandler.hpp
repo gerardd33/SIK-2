@@ -1,6 +1,8 @@
 #ifndef ERRORHANDLER_HPP_
 #define ERRORHANDLER_HPP_
 
+#include "InterruptedException.hpp"
+#include "Environment.hpp"
 #include <cstdio>
 #include <cstdlib>
 #include <cerrno>
@@ -8,10 +10,11 @@
 
 class ErrorHandler {
 public:
-	static void usage();
-	static void fatal(const char* message);
-	static void syserr(const char* message);
+	static void usage() __attribute__((noreturn));
+	static void fatal(const char* message) __attribute__((noreturn));
+	static void syserr(const char* message) __attribute__((noreturn));
 	static void noexit(const char* message);
+	static void checkInterrupted();
 
 	// TODO usun wywolania
 	static void debug(const char* message, int value = 0);
