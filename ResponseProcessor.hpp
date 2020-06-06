@@ -28,6 +28,7 @@ private:
 	void readHeaders();
 	void readData();
 	void checkIfMetadataInterval(char* line);
+	void checkIfRadioName(char* line);
 	bool checkIfFinished();
 	void readAudioBlock(char* audioBuffer);
 	void readMetadataBlock(char* metadataSizeBuffer, char* metadataBuffer);

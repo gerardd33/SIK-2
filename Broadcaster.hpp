@@ -19,10 +19,23 @@ public:
 		interrupted = true;
 	}
 
+	void setRadioName(const char* newName) {
+		this->radioName = newName;
+	}
+
 private:
+	static const uint16_t DISCOVER = 1;
+	static const uint16_t IAM = 2;
+	static const uint16_t KEEPALIVE = 3;
+	static const uint16_t AUDIO = 4;
+	static const uint16_t METADATA = 6;
+	unsigned int MESSAGE_BUFFER_SIZE = 1024;
+	const char* UNKNOWN_RADIO_NAME = "unknown";
+
 	InputData& inputData;
 	UdpClient udpConnection;
 	bool interrupted;
+	const char* radioName;
 
 	LastContactMap lastContactMap;
 	sockaddr_in getClientAddress(std::pair<sockaddr_in, long long> mapEntry);
@@ -32,8 +45,6 @@ private:
 	void handleClients();
 
 	bool checkReceivedErrorType(ssize_t receivedLength);
-
-	unsigned int MESSAGE_FROM_CLIENT_BUFFER_SIZE = 1024;
 };
 
 #endif //BROADCASTER_HPP_

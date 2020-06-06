@@ -35,6 +35,7 @@ void ResponseProcessor::readHeaders() {
 
 		convertHeaderNameToLowercase(line);
 		checkIfMetadataInterval(line);
+		checkIfRadioName(line);
 	}
 
 	free(line);
@@ -121,11 +122,25 @@ void ResponseProcessor::convertHeaderNameToLowercase(char* line) {
 
 void ResponseProcessor::checkIfMetadataInterval(char* line) {
 	size_t readValue;
+	// TODO sprawdz czy zmienic [\r\n] na %*
 	int sscanfResult = sscanf(line, "icy-metaint%*[: ]%zu[\r\n]", &readValue);
 
 	if (sscanfResult > 0) {
 		this->dataChunkSize = readValue;
 	}
+}
+
+void ResponseProcessor::checkIfRadioName(char* line) {
+	char* readValue = nullptr;
+	// TODO sprawdz czy zmienic [\r\n] na %*
+	int sscanfResult = sscanf(line, "icy-name%*[: ]%ms[\r\n]", &readValue);
+
+	if (sscanfResult > 0) {
+		this->broadcaster.setRadioName(readValue);
+	}
+
+	// TODO czy nie wywala jesli nullptr?
+	free(readValue);
 }
 
 ResponseProcessor::ResponseProcessor(InputData& inputData, FILE* radioSocketFile, Broadcaster& broadcaster) :

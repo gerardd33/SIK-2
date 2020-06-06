@@ -25,12 +25,12 @@ void Broadcaster::handleClients() {
 	// TODO podziel lepiej na funkcje, przenies niektore odpowiedzialnosci do UDP
 
 	struct sockaddr_in clientAddress;
-	char messageFromClientBuffer[MESSAGE_FROM_CLIENT_BUFFER_SIZE];
+	char messageBuffer[MESSAGE_BUFFER_SIZE];
 
 	int socketDescriptor = this->udpConnection.getSocketDescriptor();
 	while (!this->interrupted) {
-		socklen_t clientAddressLength = (socklen_t) sizeof(clientAddress);
-		ssize_t receivedLength = recvfrom(socketDescriptor, messageFromClientBuffer, sizeof(messageFromClientBuffer),
+		auto clientAddressLength = static_cast<socklen_t>(sizeof(clientAddress));
+		ssize_t receivedLength = recvfrom(socketDescriptor, messageBuffer, sizeof(messageBuffer),
 							  0, (struct sockaddr*) &clientAddress, &clientAddressLength);
 
 		if (receivedLength <= 0) {
@@ -44,12 +44,12 @@ void Broadcaster::handleClients() {
 		// zmien nazwe bufora
 
 		// TODO zmien i ladniej
-		uint16_t messageType = ntohs(*((uint16_t*) messageFromClientBuffer));
+		uint16_t messageType = ntohs(*((uint16_t*) messageBuffer));
 		switch (messageType) {
 			case DISCOVER:
-				*((uint16_t) messageFromClientBuffer) = htons(IAM);
-				*((uint16_t) (messageFromClientBuffer + 2)) = htons(radioname.size);
-				strcpy(messageFromClientBuffer + 4, radioname);
+				*((uint16_t*) messageBuffer) = htons(IAM);
+				*((uint16_t*) (messageBuffer + 2)) = htons(radioname.size);
+				strcpy(messageBuffer + 4, radioname);
 
 				responseLength = radioname.size + 4
 				ssize_t sentLength = sendto(socketDescriptor, messageFromClientBuffer, responseLength, 0,
@@ -75,7 +75,7 @@ void Broadcaster::handleClients() {
 }
 
 Broadcaster::Broadcaster(InputData& inputData) : inputData(inputData), interrupted(false),
-	udpConnection(inputData) {
+	udpConnection(inputData), radioName(UNKNOWN_RADIO_NAME) {
 	// TODO multicast
 
 	// TODO jesli bedzie dzialac, przesun do initialisation list
