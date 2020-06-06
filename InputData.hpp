@@ -52,6 +52,8 @@ public:
 	}
 
 private:
+	static const unsigned int DEFAULT_TIMEOUT = 5;
+
 	bool requestMetadata;
 	const char* radioHost;
 	const char* radioResourcePath;
@@ -64,11 +66,9 @@ private:
 	unsigned int broadcastPort;
 	unsigned int broadcastTimeout;
 
-	static const unsigned int DEFAULT_TIMEOUT = 5;
-
 	void parseArguments(int argc, const char** argv);
 	void assignArgument(char argumentFlag, const char* argumentValue);
-	int convertToInteger(const char* string);
+	static int parseInteger(const char* string);
 };
 
 #endif //INPUTDATA_HPP_

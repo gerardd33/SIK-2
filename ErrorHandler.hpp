@@ -1,7 +1,6 @@
 #ifndef ERRORHANDLER_HPP_
 #define ERRORHANDLER_HPP_
 
-#include "InterruptedException.hpp"
 #include "Environment.hpp"
 #include <cstdio>
 #include <cstdlib>

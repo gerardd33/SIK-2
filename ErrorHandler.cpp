@@ -2,7 +2,7 @@
 
 void ErrorHandler::checkInterrupted() {
 	if (errno == EINTR || Environment::interrupted) {
-		throw InterruptedException();
+		throw Environment::InterruptedException();
 	}
 }
 
