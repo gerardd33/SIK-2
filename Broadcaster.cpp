@@ -25,7 +25,7 @@ void Broadcaster::handleClients() {
 	// TODO podziel lepiej na funkcje, przenies niektore odpowiedzialnosci do UDP
 
 	struct sockaddr_in clientAddress;
-	char messageBuffer[MESSAGE_BUFFER_SIZE];
+	char messageBuffer[DEFAULT_DATA_CHUNK_SIZE + 3 * HEADER_FIELD_SIZE];
 
 	int socketDescriptor = this->udpConnection.getSocketDescriptor();
 	while (!this->interrupted) {
