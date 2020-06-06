@@ -1,13 +1,22 @@
 #include "UdpClient.hpp"
 
+UdpClient::UdpClient(InputData& inputData) : inputData(inputData) {
+	establishConnection();
+	setTimeout();
+	setMulticast();
+}
+
 UdpClient::~UdpClient() {
 	close(this->socketDescriptor);
 }
 
-UdpClient::UdpClient(InputData& inputData) : inputData(inputData) {
-	establishUdpConnection();
-	setTimeout();
-	setMulticast();
+void UdpClient::establishConnection() {
+	this->socketDescriptor = socket(AF_INET, SOCK_DGRAM, 0);
+	if (socketDescriptor < 0) {
+		ErrorHandler::syserr("socket");
+	}
+
+	bindSocket();
 }
 
 void UdpClient::bindSocket() {
@@ -45,19 +54,9 @@ void UdpClient::setMulticast() {
 			ErrorHandler::fatal("Invalid multicast address");
 		}
 
-		// TODO usun casta na void* jesli dziala
 		if (setsockopt(this->socketDescriptor, IPPROTO_IP, IP_ADD_MEMBERSHIP,
-			(void*) &requirements, sizeof(ip_mreq)) < 0) {
+			&requirements, sizeof(ip_mreq)) < 0) {
 			ErrorHandler::syserr("setsockopt");
 		}
 	}
-}
-
-void UdpClient::establishUdpConnection() {
-	this->socketDescriptor = socket(AF_INET, SOCK_DGRAM, 0);
-	if (socketDescriptor < 0) {
-		ErrorHandler::syserr("socket");
-	}
-
-	bindSocket();
 }

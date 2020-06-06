@@ -16,16 +16,17 @@ public:
 	}
 
 private:
+	const unsigned int DEFAULT_TIMEOUT = 1;
+
 	InputData& inputData;
+
 	int socketDescriptor;
 	struct sockaddr_in serverAddress;
 
-	void establishUdpConnection();
+	void establishConnection();
 	void bindSocket();
 	void setTimeout();
 	void setMulticast();
-
-	const unsigned int DEFAULT_TIMEOUT = 1;
 };
 
 #endif //UDPCLIENT_HPP_

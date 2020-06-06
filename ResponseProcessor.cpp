@@ -46,7 +46,6 @@ void ResponseProcessor::readHeaders() {
 		}
 
 		if (strcmp(line, CRLF) == 0) {
-			free(line);
 			break;
 		}
 
