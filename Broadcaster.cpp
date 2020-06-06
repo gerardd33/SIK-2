@@ -41,25 +41,32 @@ void Broadcaster::handleClients() {
 	struct sockaddr_in clientAddress{};
 	char messageBuffer[MESSAGE_BUFFER_SIZE];
 
+	this->waitForRadioMutex.lock();
+	fprintf(stderr, "Radioname: %s:\n", this->radioName);
+
 	while (!this->interrupted) {
 		auto clientAddressLength = static_cast<socklen_t>(sizeof(clientAddress));
+		ErrorHandler::debug("started receiving");
 		ssize_t receivedLength = recvfrom(this->udpConnection.getSocketDescriptor(),
 			messageBuffer, sizeof(messageBuffer),0,
 			(struct sockaddr*) &clientAddress, &clientAddressLength);
 
+		ErrorHandler::debug("received something of length ", receivedLength);
 		if (receivedLength <= 0) {
 			if (checkReceivedErrorType(receivedLength)) {
-				return;
-			} else {
 				continue;
+			} else {
+				return;
 			}
 		}
 
 		uint16_t messageType = ntohs(*((uint16_t*) messageBuffer));
+		ErrorHandler::debug("message type", messageType);
 		if (messageType == DISCOVER) {
 			memset(messageBuffer, 0, sizeof(char) * MESSAGE_BUFFER_SIZE);
 			sendMessage(IAM, clientAddress, messageBuffer, this->radioName, strlen(this->radioName));
 			updateLastContact(clientAddress);
+			ErrorHandler::debug("got a client address");
 		} else if (messageType == KEEPALIVE) {
 			updateLastContact(clientAddress);
 		} else {
@@ -71,8 +78,7 @@ void Broadcaster::handleClients() {
 
 Broadcaster::Broadcaster(InputData& inputData) : inputData(inputData), interrupted(false),
 	udpConnection(inputData), radioName(UNKNOWN_RADIO_NAME) {
-
-	// TODO jesli bedzie dzialac, przesun do initialisation list
+	this->waitForRadioMutex.lock();
 	this->clientHandler = std::thread(&Broadcaster::handleClients, this);
 }
 
@@ -98,6 +104,11 @@ std::vector<sockaddr_in> Broadcaster::getActiveClients() {
 
 	lastContactMapMutex.unlock();
 	return activeClients;
+}
+
+void Broadcaster::setRadioName(const char* newName) {
+	this->radioName = strdup(newName);
+	this->waitForRadioMutex.unlock();
 }
 
 void Broadcaster::sendMessage(uint16_t messageType, const sockaddr_in clientAddress, char* messageBuffer, const char* messageContent,

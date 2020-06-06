@@ -143,6 +143,7 @@ void ResponseProcessor::checkIfRadioName(char* line) {
 	int sscanfResult = sscanf(line, "icy-name%*[: ]%ms[\r\n]", &readValue);
 
 	if (sscanfResult > 0) {
+		fprintf(stderr, "RADIONAME GOT: %s:\n", readValue);
 		this->broadcaster.setRadioName(readValue);
 	}
 

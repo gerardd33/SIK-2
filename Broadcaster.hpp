@@ -22,9 +22,7 @@ public:
 		interrupted = true;
 	}
 
-	void setRadioName(const char* newName) {
-		this->radioName = newName;
-	}
+	void setRadioName(const char* newName);
 
 private:
 	static const uint16_t DISCOVER = 1;
@@ -68,6 +66,7 @@ private:
 	std::thread clientHandler;
 	void handleClients();
 	std::mutex lastContactMapMutex;
+	std::mutex waitForRadioMutex;
 
 	void sendMessage(uint16_t messageType, const sockaddr_in clientAddress, char* messageBuffer,
 		const char* messageContent, size_t messageSize);
