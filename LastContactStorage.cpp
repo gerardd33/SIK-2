@@ -1,18 +1,5 @@
 #include "LastContactStorage.hpp"
 
-long long LastContactStorage::getCurrentMilliseconds() {
-	timeval currentTime{};
-	gettimeofday(&currentTime, nullptr);
-	long long currentMilliseconds = currentTime.tv_sec * 1000 + currentTime.tv_usec / 1000;
-	return currentMilliseconds;
-}
-
-void LastContactStorage::updateLastContact(sockaddr_in clientAddress) {
-	this->storageMutex.lock();
-	lastContactMap[clientAddress] = getCurrentMilliseconds();
-	this->storageMutex.unlock();
-}
-
 std::vector<sockaddr_in> LastContactStorage::getActiveClients() {
 	this->storageMutex.lock();
 
@@ -35,4 +22,18 @@ std::vector<sockaddr_in> LastContactStorage::getActiveClients() {
 
 	this->storageMutex.unlock();
 	return activeClients;
+}
+
+void LastContactStorage::updateLastContact(sockaddr_in clientAddress) {
+	this->storageMutex.lock();
+	lastContactMap[clientAddress] = getCurrentMilliseconds();
+	this->storageMutex.unlock();
+}
+
+
+long long LastContactStorage::getCurrentMilliseconds() {
+	timeval currentTime{};
+	gettimeofday(&currentTime, nullptr);
+	long long currentMilliseconds = currentTime.tv_sec * 1000 + currentTime.tv_usec / 1000;
+	return currentMilliseconds;
 }
