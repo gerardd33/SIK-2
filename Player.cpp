@@ -2,7 +2,6 @@
 
 void Player::run() {
 	TcpClient tcpClient(inputData);
-
 	RequestSender requestSender(inputData, tcpClient);
 	requestSender.sendRequest();
 
