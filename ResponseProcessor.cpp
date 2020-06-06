@@ -3,7 +3,7 @@
 ResponseProcessor::ResponseProcessor(InputData& inputData, TcpClient& tcpClient, Broadcaster* broadcaster) :
 	inputData(inputData), tcpClient(tcpClient), broadcaster(broadcaster) {
 	if (this->inputData.isRequestMetadata()) {
-		this->dataChunkSize = -1;
+		this->dataChunkSize = 0;
 	} else {
 		this->dataChunkSize = DEFAULT_DATA_CHUNK_SIZE;
 	}
@@ -59,7 +59,7 @@ void ResponseProcessor::readHeaders() {
 
 	free(line);
 	// Did not find metadata interval information in headers.
-	if (this->dataChunkSize == -1) {
+	if (this->dataChunkSize == 0) {
 		ErrorHandler::fatal("Processing server response");
 	}
 }
@@ -118,13 +118,13 @@ void ResponseProcessor::readAudioBlock(char* audioBuffer) {
 	int toBeRead = this->dataChunkSize;
 
 	while (toBeRead > 0) {
-		size_t bytesRead = fread(audioBuffer, 1, std::min(toBeRead,
-			static_cast<int>(DEFAULT_DATA_CHUNK_SIZE)), this->tcpClient.getSocketFile());
-		if (bytesRead < std::min(toBeRead, static_cast<int>(DEFAULT_DATA_CHUNK_SIZE))) {
+		size_t bytesRead = fread(audioBuffer, 1, std::min(static_cast<size_t>(toBeRead),
+			DEFAULT_DATA_CHUNK_SIZE), this->tcpClient.getSocketFile());
+		if (bytesRead < std::min(static_cast<size_t>(toBeRead), DEFAULT_DATA_CHUNK_SIZE)) {
 			ErrorHandler::fatal("Timeout");
 		}
 
-		processAudio(audioBuffer, std::min(toBeRead, static_cast<int>(DEFAULT_DATA_CHUNK_SIZE)));
+		processAudio(audioBuffer, std::min(static_cast<size_t>(toBeRead), DEFAULT_DATA_CHUNK_SIZE));
 		toBeRead -= DEFAULT_DATA_CHUNK_SIZE;
 	}
 }

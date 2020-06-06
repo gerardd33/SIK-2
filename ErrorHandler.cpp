@@ -29,8 +29,3 @@ void ErrorHandler::syserr(const char* message) {
 	fprintf(stderr, "(%d; %s)\n", errno, strerror(errno));
 	exit(1);
 }
-
-// TODO usun
-void ErrorHandler::debug(const char* message, int value) {
-	fprintf(stderr, "DEBUG: %s: %d\n", message, value);
-}

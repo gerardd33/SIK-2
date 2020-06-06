@@ -7,8 +7,6 @@ int main(int argc, const char** argv) {
 	Player player(argc, argv);
 	try {
 		player.run();
-	} catch (...) {
-		fprintf(stderr, "CAUGHT\n");
-	}
+	} catch (...) {}
 	return 0;
 }

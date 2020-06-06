@@ -13,9 +13,6 @@ public:
 	static void fatal(const char* message) __attribute__((noreturn));
 	static void syserr(const char* message) __attribute__((noreturn));
 	static void checkInterrupted();
-
-	// TODO usun wywolania
-	static void debug(const char* message, int value = 0);
 };
 
 #endif //ERRORHANDLER_HPP_

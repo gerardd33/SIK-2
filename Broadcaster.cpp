@@ -67,7 +67,6 @@ void Broadcaster::sendMessage(uint16_t messageType, sockaddr_in& clientAddress, 
 
 void Broadcaster::broadcastAudio(const char* audioBuffer, size_t dataSize) {
 	std::vector<sockaddr_in> activeClients = this->lastContactStorage.getActiveClients();
-	ErrorHandler::debug("Active client number", activeClients.size());
 
 	char messageBuffer[MESSAGE_BUFFER_SIZE];
 	for (auto& clientAddress : activeClients) {

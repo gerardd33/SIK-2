@@ -77,9 +77,6 @@ void InputData::assignArgument(char argumentFlag, const char* argumentValue) {
 		case 'P':
 			this->broadcasting = true;
 			this->broadcastPort = parseInteger(argumentValue);
-			if (this->broadcastPort < 0) {
-				ErrorHandler::usage();
-			}
 			break;
 
 		case 'B':
