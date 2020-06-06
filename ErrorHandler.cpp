@@ -8,11 +8,19 @@ void ErrorHandler::usage() {
 }
 
 void ErrorHandler::fatal(const char* message) {
+	if (errno == EINTR) {
+		return;
+	}
+
 	fprintf(stderr, "ERROR: %s\n", message);
 	exit(1);
 }
 
 void ErrorHandler::syserr(const char* message) {
+	if (errno == EINTR) {
+		return;
+	}
+
 	fprintf(stderr, "ERROR: %s\n", message);
 	fprintf(stderr, "(%d; %s)\n", errno, strerror(errno));
 	exit(1);

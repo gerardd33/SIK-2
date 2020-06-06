@@ -1,6 +1,7 @@
 #ifndef RESPONSEPROCESSOR_HPP_
 #define RESPONSEPROCESSOR_HPP_
 
+#include "Environment.hpp"
 #include "ErrorHandler.hpp"
 #include "InputData.hpp"
 #include "Broadcaster.hpp"

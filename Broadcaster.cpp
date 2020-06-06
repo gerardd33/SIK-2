@@ -1,27 +1,18 @@
 #include "Broadcaster.hpp"
 
-
-
 bool Broadcaster::checkReceivedErrorType(ssize_t receivedLength) {
-	if (receivedLength < 0) {
-		if (errno == EINPROGRESS || errno == EAGAIN || errno == EWOULDBLOCK) {
-			return true; // continue;
-		} else {
-			ErrorHandler::syserr("recvfrom");
-		}
-	} else if (receivedLength == 0) {
-		interrupt();
-		return false; // return;
+	if (errno == EINPROGRESS || errno == EAGAIN || errno == EWOULDBLOCK) {
+		return true; // continue;
 	}
 
-	return true;
+	if (receivedLength == 0) {
+		return false; // return;
+	} else { // receivedLength < 0
+		ErrorHandler::syserr("recvfrom");
+	}
 }
 
-void Broadcaster::interrupt() {
-	this->interrupted = true;
-}
-
-Broadcaster::Broadcaster(InputData& inputData) : inputData(inputData), interrupted(false),
+Broadcaster::Broadcaster(InputData& inputData) : inputData(inputData),
 	udpConnection(inputData), radioName(UNKNOWN_RADIO_NAME), lastContactStorage(inputData) {
 	this->waitForRadioMutex.lock();
 	this->clientHandler = std::thread(&Broadcaster::handleClients, this);
@@ -43,7 +34,7 @@ void Broadcaster::handleClients() {
 	this->waitForRadioMutex.lock();
 	fprintf(stderr, "Radioname: %s:\n", this->radioName);
 
-	while (!this->interrupted) {
+	while (!Environment::interrupted) {
 		auto clientAddressLength = static_cast<socklen_t>(sizeof(clientAddress));
 		ssize_t receivedLength = recvfrom(this->udpConnection.getSocketDescriptor(),
 										  messageBuffer, sizeof(messageBuffer),0,
@@ -93,7 +84,11 @@ void Broadcaster::sendMessage(uint16_t messageType, sockaddr_in clientAddress, c
 								messageLength, 0, (struct sockaddr*) &clientAddress, clientAddressLength);
 
 	if (sentLength < 0) {
-		ErrorHandler::syserr("sendto");
+		if (errno == EINTR) {
+			return;
+		} else {
+			ErrorHandler::syserr("sendto");
+		}
 	}
 }
 

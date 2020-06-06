@@ -1,6 +1,7 @@
 #ifndef BROADCASTER_HPP_
 #define BROADCASTER_HPP_
 
+#include "Environment.hpp"
 #include "UdpClient.hpp"
 #include "LastContactStorage.hpp"
 #include <netinet/in.h>
@@ -33,9 +34,6 @@ private:
 	InputData& inputData;
 	UdpClient udpConnection;
 	const char* radioName;
-	bool interrupted;
-
-	void interrupt();
 
 	LastContactStorage lastContactStorage;
 
