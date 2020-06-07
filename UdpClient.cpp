@@ -24,7 +24,8 @@ void UdpClient::bindSocket() {
 	this->serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);
 	this->serverAddress.sin_port = htons(inputData.getBroadcastPort());
 
-	if (bind(this->socketDescriptor, reinterpret_cast<struct sockaddr*>(&this->serverAddress),
+	if (bind(this->socketDescriptor,
+			 reinterpret_cast<struct sockaddr*>(&this->serverAddress),
 			 static_cast<socklen_t>(sizeof(this->serverAddress))) < 0) {
 		ErrorHandler::syserr("bind");
 	}
@@ -35,11 +36,13 @@ void UdpClient::setTimeout() {
 	timeout.tv_sec = DEFAULT_TIMEOUT;
 	timeout.tv_usec = 0;
 
-	if (setsockopt(this->socketDescriptor, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
+	if (setsockopt(this->socketDescriptor, SOL_SOCKET, SO_RCVTIMEO, &timeout,
+				   sizeof(timeout)) < 0) {
 		ErrorHandler::syserr("setsockopt");
 	}
 
-	if (setsockopt(this->socketDescriptor, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) < 0) {
+	if (setsockopt(this->socketDescriptor, SOL_SOCKET, SO_SNDTIMEO, &timeout,
+				   sizeof(timeout)) < 0) {
 		ErrorHandler::syserr("setsockopt");
 	}
 }
@@ -50,12 +53,12 @@ void UdpClient::setMulticast() {
 		requirements.imr_interface.s_addr = htonl(INADDR_ANY);
 
 		if (inet_aton(this->inputData.getBroadcastMulticastAddress(),
-			&requirements.imr_multiaddr) == 0) {
+					  &requirements.imr_multiaddr) == 0) {
 			ErrorHandler::fatal("Invalid multicast address");
 		}
 
 		if (setsockopt(this->socketDescriptor, IPPROTO_IP, IP_ADD_MEMBERSHIP,
-			&requirements, sizeof(ip_mreq)) < 0) {
+					   &requirements, sizeof(ip_mreq)) < 0) {
 			ErrorHandler::syserr("setsockopt");
 		}
 	}

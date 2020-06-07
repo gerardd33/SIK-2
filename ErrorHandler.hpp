@@ -1,11 +1,12 @@
 #ifndef ERRORHANDLER_HPP_
 #define ERRORHANDLER_HPP_
 
-#include "Environment.hpp"
+#include <cerrno>
 #include <cstdio>
 #include <cstdlib>
-#include <cerrno>
 #include <cstring>
+
+#include "Environment.hpp"
 
 class ErrorHandler {
 public:
@@ -15,4 +16,4 @@ public:
 	static void checkInterrupted();
 };
 
-#endif //ERRORHANDLER_HPP_
+#endif  // ERRORHANDLER_HPP_

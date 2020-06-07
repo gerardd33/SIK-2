@@ -1,13 +1,23 @@
-#include <cstdlib>
 #include "InputData.hpp"
 
-InputData::InputData(int argc, const char** argv) : requestMetadata(false), radioHost(nullptr),
-	radioResourcePath(nullptr), radioPort(nullptr), radioTimeout(DEFAULT_TIMEOUT), broadcasting(false),
-	multicast(false), broadcastMulticastAddress(nullptr), broadcastPort(0), broadcastTimeout(DEFAULT_TIMEOUT) {
+#include <cstdlib>
+
+InputData::InputData(int argc, const char** argv)
+	: requestMetadata(false),
+	  radioHost(nullptr),
+	  radioResourcePath(nullptr),
+	  radioPort(nullptr),
+	  radioTimeout(DEFAULT_TIMEOUT),
+	  broadcasting(false),
+	  multicast(false),
+	  broadcastMulticastAddress(nullptr),
+	  broadcastPort(0),
+	  broadcastTimeout(DEFAULT_TIMEOUT) {
 	parseArguments(argc, argv);
 
 	// Any of the required arguments is absent.
-	if (this->radioHost == nullptr || this->radioResourcePath == nullptr || this->radioPort == nullptr) {
+	if (this->radioHost == nullptr || this->radioResourcePath == nullptr ||
+		this->radioPort == nullptr) {
 		ErrorHandler::usage();
 	}
 }
@@ -24,8 +34,8 @@ InputData::~InputData() {
 
 void InputData::parseArguments(int argc, const char** argv) {
 	for (int argumentId = 1; argumentId < argc; ++argumentId) {
-		if (argumentId % 2 == 1) { // A flag identifying the argument.
-			if (argumentId + 1 >= argc) { // No value entered for this argument.
+		if (argumentId % 2 == 1) {       // A flag identifying the argument.
+			if (argumentId + 1 >= argc) {  // No value entered for this argument.
 				ErrorHandler::usage();
 			}
 
@@ -37,7 +47,7 @@ void InputData::parseArguments(int argc, const char** argv) {
 
 			assignArgument(argumentFlag[0], argv[argumentId + 1]);
 			free(argumentFlag);
-		} else if (argv[argumentId][0] == '-') { // A value of the argument.
+		} else if (argv[argumentId][0] == '-') {  // A value of the argument.
 			ErrorHandler::usage();
 		}
 	}
@@ -98,7 +108,7 @@ void InputData::assignArgument(char argumentFlag, const char* argumentValue) {
 
 int InputData::parseInteger(const char* string) {
 	int parsedInteger = static_cast<int>(strtol(string, nullptr, 10));
-	if (parsedInteger == 0 && errno != 0) { // Invalid number.
+	if (parsedInteger == 0 && errno != 0) {  // Invalid number.
 		ErrorHandler::usage();
 	}
 

@@ -1,19 +1,22 @@
 #ifndef LASTCONTACTSTORAGE_HPP_
 #define LASTCONTACTSTORAGE_HPP_
 
-#include "InputData.hpp"
 #include <netinet/in.h>
 #include <sys/time.h>
-#include <mutex>
-#include <vector>
-#include <thread>
+
 #include <map>
+#include <mutex>
+#include <thread>
+#include <vector>
+
+#include "InputData.hpp"
 
 using lastContactMapEntry = std::pair<const sockaddr_in, long long>;
 
 class LastContactStorage {
 public:
-	explicit LastContactStorage(InputData& inputData) : inputData(inputData) {}
+	explicit LastContactStorage(InputData& inputData) : inputData(inputData) {
+	}
 
 	std::vector<sockaddr_in> getActiveClients();
 	void updateLastContact(sockaddr_in clientAddress);
@@ -48,7 +51,6 @@ private:
 	}
 
 	static long long getCurrentMilliseconds();
-
 };
 
-#endif //LASTCONTACTSTORAGE_HPP_
+#endif  // LASTCONTACTSTORAGE_HPP_

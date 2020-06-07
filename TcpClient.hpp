@@ -1,9 +1,10 @@
 #ifndef TCPCLIENT_HPP_
 #define TCPCLIENT_HPP_
 
-#include "InputData.hpp"
 #include <netdb.h>
 #include <unistd.h>
+
+#include "InputData.hpp"
 
 class TcpClient {
 public:
@@ -24,4 +25,4 @@ private:
 	void setRadioTimeout();
 };
 
-#endif //TCPCLIENT_HPP_
+#endif  // TCPCLIENT_HPP_

@@ -1,10 +1,11 @@
 #ifndef INPUTDATA_HPP_
 #define INPUTDATA_HPP_
 
-#include "ErrorHandler.hpp"
+#include <cerrno>
 #include <cstdio>
 #include <cstring>
-#include <cerrno>
+
+#include "ErrorHandler.hpp"
 
 class InputData {
 public:
@@ -71,4 +72,4 @@ private:
 	static int parseInteger(const char* string);
 };
 
-#endif //INPUTDATA_HPP_
+#endif  // INPUTDATA_HPP_

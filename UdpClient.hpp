@@ -1,10 +1,11 @@
 #ifndef UDPCLIENT_HPP_
 #define UDPCLIENT_HPP_
 
-#include "InputData.hpp"
-#include <netdb.h>
 #include <libnet.h>
+#include <netdb.h>
 #include <unistd.h>
+
+#include "InputData.hpp"
 
 class UdpClient {
 public:
@@ -29,4 +30,4 @@ private:
 	void setMulticast();
 };
 
-#endif //UDPCLIENT_HPP_
+#endif  // UDPCLIENT_HPP_

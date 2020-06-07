@@ -13,4 +13,4 @@ namespace Environment {
 		signalAction.sa_handler = signalHandler;
 		sigaction(SIGINT, &signalAction, nullptr);
 	}
-}
+}  // namespace Environment

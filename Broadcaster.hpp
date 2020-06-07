@@ -1,12 +1,13 @@
 #ifndef BROADCASTER_HPP_
 #define BROADCASTER_HPP_
 
-#include "Environment.hpp"
-#include "UdpClient.hpp"
-#include "LastContactStorage.hpp"
 #include <netinet/in.h>
 #include <sys/time.h>
 #include <thread>
+
+#include "Environment.hpp"
+#include "LastContactStorage.hpp"
+#include "UdpClient.hpp"
 
 class Broadcaster {
 public:
@@ -27,7 +28,8 @@ private:
 
 	const size_t DEFAULT_DATA_CHUNK_SIZE = 8192;
 	const size_t HEADER_FIELD_SIZE = 2;
-	const size_t MESSAGE_BUFFER_SIZE = DEFAULT_DATA_CHUNK_SIZE + 4 * HEADER_FIELD_SIZE;
+	const size_t MESSAGE_BUFFER_SIZE =
+		DEFAULT_DATA_CHUNK_SIZE + 4 * HEADER_FIELD_SIZE;
 	const char* UNKNOWN_RADIO_NAME = "unknown";
 
 	InputData& inputData;
@@ -40,11 +42,13 @@ private:
 	std::mutex waitForRadioMutex;
 
 	void handleClients();
-	void sendMessage(uint16_t messageType, sockaddr_in& clientAddress, char* messageBuffer,
-					const char* messageContent, size_t contentSize);
+	void sendMessage(uint16_t messageType, sockaddr_in& clientAddress,
+					 char* messageBuffer, const char* messageContent,
+					 size_t contentSize);
 
-	static void copyContentToBuffer(char* messageBuffer, const char* messageContent, size_t dataSize);
+	static void copyContentToBuffer(char* messageBuffer,
+									const char* messageContent, size_t dataSize);
 	static bool checkReceivedErrorType(ssize_t receivedLength);
 };
 
-#endif //BROADCASTER_HPP_
+#endif  // BROADCASTER_HPP_

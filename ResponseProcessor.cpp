@@ -1,7 +1,8 @@
 #include "ResponseProcessor.hpp"
 
-ResponseProcessor::ResponseProcessor(InputData& inputData, TcpClient& tcpClient, Broadcaster* broadcaster) :
-	inputData(inputData), tcpClient(tcpClient), broadcaster(broadcaster) {
+ResponseProcessor::ResponseProcessor(InputData& inputData, TcpClient& tcpClient,
+									 Broadcaster* broadcaster)
+	: inputData(inputData), tcpClient(tcpClient), broadcaster(broadcaster) {
 	if (this->inputData.isRequestMetadata()) {
 		this->dataChunkSize = 0;
 	} else {
@@ -21,7 +22,8 @@ bool ResponseProcessor::readStatusLine() {
 	char* statusMessage = nullptr;
 	int statusCode;
 
-	if (fscanf(this->tcpClient.getSocketFile(), "%*[^ ] %d %m[^\r\n]\n", &statusCode, &statusMessage) < 0) {
+	if (fscanf(this->tcpClient.getSocketFile(), "%*[^ ] %d %m[^\r\n]\n",
+			   &statusCode, &statusMessage) < 0) {
 		ErrorHandler::fatal("Processing server response");
 	}
 
@@ -85,7 +87,8 @@ void ResponseProcessor::checkIfRadioName(char* line) {
 }
 
 void ResponseProcessor::readData() {
-	char* audioBuffer = reinterpret_cast<char*>(malloc(sizeof(char) * this->dataChunkSize));
+	char* audioBuffer =
+		reinterpret_cast<char*>(malloc(sizeof(char) * this->dataChunkSize));
 	char metadataSizeBuffer[1];
 	char metadataBuffer[METADATA_MAX_LENGTH];
 
@@ -118,24 +121,30 @@ void ResponseProcessor::readAudioBlock(char* audioBuffer) {
 	int toBeRead = this->dataChunkSize;
 
 	while (toBeRead > 0) {
-		size_t bytesRead = fread(audioBuffer, 1, std::min(static_cast<size_t>(toBeRead),
-			DEFAULT_DATA_CHUNK_SIZE), this->tcpClient.getSocketFile());
-		if (bytesRead < std::min(static_cast<size_t>(toBeRead), DEFAULT_DATA_CHUNK_SIZE)) {
+		size_t bytesRead =
+			fread(audioBuffer, 1,
+				  std::min(static_cast<size_t>(toBeRead), DEFAULT_DATA_CHUNK_SIZE),
+				  this->tcpClient.getSocketFile());
+		if (bytesRead <
+			std::min(static_cast<size_t>(toBeRead), DEFAULT_DATA_CHUNK_SIZE)) {
 			ErrorHandler::fatal("Timeout");
 		}
 
-		processAudio(audioBuffer, std::min(static_cast<size_t>(toBeRead), DEFAULT_DATA_CHUNK_SIZE));
+		processAudio(audioBuffer, std::min(static_cast<size_t>(toBeRead),
+										   DEFAULT_DATA_CHUNK_SIZE));
 		toBeRead -= DEFAULT_DATA_CHUNK_SIZE;
 	}
 }
 
-void ResponseProcessor::readMetadataBlock(char* metadataSizeBuffer, char* metadataBuffer) {
+void ResponseProcessor::readMetadataBlock(char* metadataSizeBuffer,
+										  char* metadataBuffer) {
 	if (!this->inputData.isRequestMetadata()) {
 		return;
 	}
 
 	metadataSizeBuffer[0] = 0;
-	size_t bytesRead = fread(metadataSizeBuffer, 1, 1, this->tcpClient.getSocketFile());
+	size_t bytesRead =
+		fread(metadataSizeBuffer, 1, 1, this->tcpClient.getSocketFile());
 	if (bytesRead < 1) {
 		ErrorHandler::fatal("Processing server response");
 	}
@@ -146,7 +155,8 @@ void ResponseProcessor::readMetadataBlock(char* metadataSizeBuffer, char* metada
 	}
 
 	metadataSize *= METADATA_BLOCKSIZE_FACTOR;
-	bytesRead = fread(metadataBuffer, 1, metadataSize, this->tcpClient.getSocketFile());
+	bytesRead =
+		fread(metadataBuffer, 1, metadataSize, this->tcpClient.getSocketFile());
 	if (bytesRead < metadataSize) {
 		ErrorHandler::fatal("Processing server response");
 	}

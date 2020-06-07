@@ -1,17 +1,19 @@
 #ifndef RESPONSEPROCESSOR_HPP_
 #define RESPONSEPROCESSOR_HPP_
 
-#include "Environment.hpp"
-#include "ErrorHandler.hpp"
-#include "InputData.hpp"
-#include "Broadcaster.hpp"
-#include "TcpClient.hpp"
 #include <cctype>
 #include <vector>
 
+#include "Broadcaster.hpp"
+#include "Environment.hpp"
+#include "ErrorHandler.hpp"
+#include "InputData.hpp"
+#include "TcpClient.hpp"
+
 class ResponseProcessor {
 public:
-	ResponseProcessor(InputData& inputData, TcpClient& tcpClient, Broadcaster* broadcaster);
+	ResponseProcessor(InputData& inputData, TcpClient& tcpClient,
+					  Broadcaster* broadcaster);
 	void processServerResponse();
 
 private:
@@ -44,4 +46,4 @@ private:
 	static void printString(FILE* stream, char* string, size_t size);
 };
 
-#endif //RESPONSEPROCESSOR_HPP_
+#endif  // RESPONSEPROCESSOR_HPP_

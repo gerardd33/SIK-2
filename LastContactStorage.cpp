@@ -9,7 +9,8 @@ std::vector<sockaddr_in> LastContactStorage::getActiveClients() {
 		long long lastContactTime = getLastContactTime(entry);
 
 		long long currentMilliseconds = getCurrentMilliseconds();
-		if (currentMilliseconds - lastContactTime > 1000 * inputData.getBroadcastTimeout())  {
+		if (currentMilliseconds - lastContactTime >
+			1000 * inputData.getBroadcastTimeout()) {
 			clientsToRemove.push_back(clientAddress);
 		} else {
 			activeClients.push_back(clientAddress);
@@ -30,10 +31,10 @@ void LastContactStorage::updateLastContact(sockaddr_in clientAddress) {
 	this->storageMutex.unlock();
 }
 
-
 long long LastContactStorage::getCurrentMilliseconds() {
 	timeval currentTime{};
 	gettimeofday(&currentTime, nullptr);
-	long long currentMilliseconds = currentTime.tv_sec * 1000 + currentTime.tv_usec / 1000;
+	long long currentMilliseconds =
+		currentTime.tv_sec * 1000 + currentTime.tv_usec / 1000;
 	return currentMilliseconds;
 }

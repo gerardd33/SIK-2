@@ -5,13 +5,12 @@ void Player::run() {
 	RequestSender requestSender(inputData, tcpClient);
 	requestSender.sendRequest();
 
-	if (this->inputData.isBroadcasting()) { // Part B
+	if (this->inputData.isBroadcasting()) {  // Part B
 		Broadcaster broadcaster(inputData);
 		ResponseProcessor responseProcessor(inputData, tcpClient, &broadcaster);
 		responseProcessor.processServerResponse();
-	} else { // Part A only
+	} else {  // Part A only
 		ResponseProcessor responseProcessor(inputData, tcpClient, nullptr);
 		responseProcessor.processServerResponse();
 	}
 }
-

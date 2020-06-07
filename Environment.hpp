@@ -1,8 +1,8 @@
 #ifndef ENVIRONMENT_HPP_
 #define ENVIRONMENT_HPP_
 
-#include <csignal>
 #include <atomic>
+#include <csignal>
 #include <exception>
 
 namespace Environment {
@@ -14,6 +14,6 @@ namespace Environment {
 			return "Interrupted";
 		}
 	};
-}
+}  // namespace Environment
 
-#endif //ENVIRONMENT_HPP_
+#endif  // ENVIRONMENT_HPP_
